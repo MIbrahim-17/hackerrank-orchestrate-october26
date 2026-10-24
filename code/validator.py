@@ -115,6 +115,26 @@ def category_of(index: EvidenceIndex, resource_id: str, override: str | None = N
     return PREFIX_DEFAULT_CATEGORY.get(prefix, "USER_PROFILE")
 
 
+HINT_ONLY_SOURCES = ("log:", "screenshot:", "document:", "activity:")  # event names and titles: hints, not labels
+
+
+def explicit_label(index: EvidenceIndex, resource_id: str) -> str | None:
+    """A category stated by a source, from evidence of any time (what a resource is does not change; DECISIONS
+    2026-10-25): a record_type field, else a structural collection or table name that maps to a category."""
+    observations = index.by_resource.get(resource_id, [])
+    labels = [o.record_type for o in observations if o.record_type]
+    if not labels:
+        labels = [o.category_hint for o in observations
+                  if o.category_hint and not o.collection.startswith(HINT_ONLY_SOURCES) and not o.record_type]
+    return max(sorted(set(labels)), key=labels.count) if labels else None
+
+
+def final_category(index: EvidenceIndex, resource_id: str, override: str | None = None) -> str:
+    """Category used for the policy: explicit label (any time) > agent judgement > hint > prefix default.
+    category_of() stays unchanged because it feeds the agent's frozen first message."""
+    return explicit_label(index, resource_id) or override or category_of(index, resource_id)
+
+
 def state_of(index: EvidenceIndex, resource_id: str, system_id: str, r: Request) -> State:
     eligible, _ = index.for_resource(resource_id, r.requested_at, r.audit_at)
     direct = [o for o in eligible if o.state != "LINKED"]
@@ -212,7 +232,7 @@ def validate_case(r: Request, index: EvidenceIndex, links: dict[str, ActivityLin
         prefix = rid.rsplit("_", 1)[0]
         system_id = next((o.system_id for o in index.by_resource.get(rid, [])), None) or {
             "account": "account_service", "analytics": "analytics_platform"}.get(prefix, prefix)
-        category = category_of(index, rid, overrides.get(rid))
+        category = final_category(index, rid, overrides.get(rid))
         state = state_of(index, rid, system_id, r)
         finding, remediation, verification = plan(category, state)
         planned.append((system_id, rid, finding, remediation, verification, state))

@@ -451,3 +451,53 @@ repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-
 worktree=main
 parent_agent=none
 
+## [2026-10-25T01:23:22+05:00] Option 1 routing, time principle, full 518 run, defects found
+
+User Prompt (verbatim, secrets redacted):
+Decisions:
+a. Option 1. Route the agent only to cases with an unlabelled support_ or analytics_ resource. Ambiguous sets go to the validator alone, since the agent answered "none" on 46 of 46. Record the measured reason in DECISIONS.md.
+b. One principle for time: what a resource is (owner and category) is stable, so evidence after audit_at may identify it. What state it is in must come from evidence at or before audit_at. Post-audit evidence is never cited. Implement this in the validator only, without changing prompts.py, tools.py, agent.py or anything that builds the agent's first message, so the pilot stays cached: an explicit category label from any evidence, at any time, overrides the agent's category judgement. The agent decides only resources with no explicit label anywhere. Note that no sample proves this and record it in DECISIONS.md as a reasoned choice consistent with the proven ownership rule. Under this rule, case_431 stays SUPPORT_ATTACHMENT.
+Then:
+1. Confirm the samples still score the same with 0 extras.
+2. Tell me the projected total spend for the routed set before running it.
+3. Run the full pipeline on all 518 cases, write output.csv at the repo root, and run the built-in validation.
+4. Report: status distribution, cost and tokens per model, budget fallbacks, how many routed cases the agent changed after the validator override, and the case IDs where an explicit label overrode the agent.
+5. For up to 5 cases the agent changed, show the evidence trail and its grounding so I can verify them by hand.
+
+Agent Response Summary:
+Implemented explicit_label/final_category (validator only) and route_to_agent in main.py; samples unchanged (F1 96.79%, 0 extras). Routing gives 84 cases (structural collection names count as explicit labels), projected total about $1.83. The full run wrote output.csv; validation caught a text sort, fixed with a numeric sort and re-run from cache, now OK. INCOMPLETE 352 / COMPLETE 156 / NOT_APPLICABLE 10; total spend $1.7270; 0 fallbacks; 3 changed cases (case_515 right, case_71 likely wrong, case_119 spurious), 0 label overrides. Found two defects (nondeterministic tie-break; pipe-format log parser, +25 resources in 16 cases when fixed); fixes cost about $0.11 and need approval because they touch brief-building code.
+
+Actions:
+* Edited code/validator.py (explicit_label, final_category), code/main.py (route_to_agent, numeric sort)
+* Ran main.py --sample --no-llm; main.py (full 518, twice: the second from cache); output.csv written and validated
+* In-memory experiments for the parser and tie fixes (no files changed)
+* Appended docs/DECISIONS.md (3 entries)
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T01:24:58+05:00] CHECKPOINT: phase 5b state, memory
+
+User Prompt (verbatim, secrets redacted):
+CHECKPOINT. Update docs/PROJECT_STATE.md for the phase we just finished: what is done, the latest sample score if it changed, open questions, and the exact next step. Append new decisions to docs/DECISIONS.md. Save only durable lessons to auto memory. Show me the diff of PROJECT_STATE.md.
+
+Agent Response Summary:
+Rewrote docs/PROJECT_STATE.md (52 lines) for phase 5b (option 1 routing, time principle, full 518 run with a valid output.csv): the sample score is unchanged, the full-run status split and agent changes are recorded, spend is $1.7270, and the next step is the user's decision on the two defect fixes (about $0.11 re-bill), then reports and packaging. No new decisions to append (all recorded last turn). Saved one durable lesson about silent-failure classes (hash-randomized ties, per-format parse coverage, eval-shaped validation).
+
+Actions:
+* Rewrote docs/PROJECT_STATE.md
+* Wrote memory silent-failure-checks.md; updated MEMORY.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+

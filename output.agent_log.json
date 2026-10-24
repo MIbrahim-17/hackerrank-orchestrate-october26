@@ -1,0 +1,2285 @@
+[
+ {
+  "case_id": "case_100",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 411,
+  "cache_read_tokens": 5403,
+  "cache_write_tokens": 1622,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence records for any candidate."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_1630",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_89",
+    "reason": "Support ticket message from requester about account access."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_102",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 224,
+  "cache_read_tokens": 5310,
+  "cache_write_tokens": 1202,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_345",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_89",
+    "reason": "Support ticket record with message excerpt from the requester."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_114",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 353,
+  "cache_read_tokens": 6199,
+  "cache_write_tokens": 3429,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "Records for analytics_4800 have null identifiers; no subject identifier."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_3786",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_88",
+    "reason": "Support ticket read log keyed by subject email; a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_118",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 343,
+  "cache_read_tokens": 6199,
+  "cache_write_tokens": 3323,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record ties analytics_8698 to a subject identifier; identifiers are null."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_036",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_88",
+    "reason": "Support ticket read keyed by subject email; a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_119",
+  "turns": 3,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 8,
+  "output_tokens": 580,
+  "cache_read_tokens": 9346,
+  "cache_write_tokens": 1903,
+  "changed": true,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_9309",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_88",
+    "reason": "Eligible log shows a support ticket read (requester_email) i.e. a support conversation. A later log (evidence_11) mentions an attachment scan, but it is post-audit and ownership-only."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_143",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 424,
+  "cache_read_tokens": 5407,
+  "cache_write_tokens": 1624,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence records tie any candidate to the subject."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_6560",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_86",
+    "reason": "Support ticket message from requester email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_148",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 425,
+  "cache_read_tokens": 5428,
+  "cache_write_tokens": 1653,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence records tie any candidate to subject."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_5716",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_86",
+    "reason": "Support ticket conversation message from requester."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_151",
+  "turns": 2,
+  "tool_calls": 4,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 390,
+  "cache_read_tokens": 6073,
+  "cache_write_tokens": 2692,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "Neither analytics record contains a subject identifier."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_5400",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_86",
+    "reason": "Support ticket message excerpt tied to user_149."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_165",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 358,
+  "cache_read_tokens": 5500,
+  "cache_write_tokens": 2753,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_2713",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_85",
+    "reason": "Analytics profile read keyed by subject email."
+   },
+   {
+    "resource_id": "support_3586",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_85",
+    "reason": "Support ticket read; requester email is the subject's."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_166",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 434,
+  "cache_read_tokens": 6195,
+  "cache_write_tokens": 3419,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record ties analytics_6402 to a subject identifier; identifiers are null."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_3155",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_85",
+    "reason": "Support ticket read log with requester email; a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_172",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 374,
+  "cache_read_tokens": 6238,
+  "cache_write_tokens": 3490,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "Records for analytics_6980 show null identifiers and no subject identifier."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_2322",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_85",
+    "reason": "Support ticket read keyed by the subject's email, so it is a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_184",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 262,
+  "cache_read_tokens": 5295,
+  "cache_write_tokens": 1195,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_1892",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_83",
+    "reason": "Support ticket message excerpt from the requester's email, in the support_platform/tickets collection."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_189",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 339,
+  "cache_read_tokens": 5390,
+  "cache_write_tokens": 1682,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_1120",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_83",
+    "reason": "Analytics profile record with audience cohort"
+   },
+   {
+    "resource_id": "support_8447",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_83",
+    "reason": "Support ticket message from requester"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_191",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 627,
+  "cache_read_tokens": 5793,
+  "cache_write_tokens": 2563,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "account_9317 record contains no subject identifier; account_6608 has no records."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "analytics_5614",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_83",
+    "reason": "analytics_platform/profiles audience cohort record"
+   },
+   {
+    "resource_id": "support_5049",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_83",
+    "reason": "support ticket message excerpt, customer_reference user_189"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_192",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 545,
+  "cache_read_tokens": 5723,
+  "cache_write_tokens": 2413,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record ties either account candidate to a subject identifier."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "analytics_4472",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_83",
+    "reason": "Analytics profile with audience cohort."
+   },
+   {
+    "resource_id": "support_5493",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_83",
+    "reason": "Support ticket message from the requester."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_193",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 240,
+  "cache_read_tokens": 5304,
+  "cache_write_tokens": 1281,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_8037",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_82",
+    "reason": "Log shows an analytics profile read with audience cohort; it is an analytics profile."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_197",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 231,
+  "cache_read_tokens": 5323,
+  "cache_write_tokens": 1306,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_6093",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_82",
+    "reason": "Log shows an analytics profile read for the subject's email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_198",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 232,
+  "cache_read_tokens": 5272,
+  "cache_write_tokens": 1240,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_6131",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_82",
+    "reason": "Support ticket read log for the requester's email; the record is a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_201",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 232,
+  "cache_read_tokens": 5506,
+  "cache_write_tokens": 1476,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_2863",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_82",
+    "reason": "Support ticket read log for a support conversation keyed by the subject's email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_202",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 348,
+  "cache_read_tokens": 5329,
+  "cache_write_tokens": 1303,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_349",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_82",
+    "reason": "Log shows an analytics profile read with an audience cohort, so it is an analytics profile."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_213",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 332,
+  "cache_read_tokens": 6055,
+  "cache_write_tokens": 2825,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record ties analytics_4460 to the subject; identifiers are null."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_1360",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_81",
+    "reason": "Support conversation message excerpt for user_211."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_214",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 342,
+  "cache_read_tokens": 5859,
+  "cache_write_tokens": 2655,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record links analytics_4460 to subject identifiers; all identifiers null."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_1146",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_81",
+    "reason": "Support record with message excerpt from requester about a delivery query."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_216",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 496,
+  "cache_read_tokens": 6358,
+  "cache_write_tokens": 4160,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record ties either account candidate to a subject identifier."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "analytics_4527",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_81",
+    "reason": "customer_analytics_profiles record with audience cohort"
+   },
+   {
+    "resource_id": "support_8453",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_81",
+    "reason": "support record with message excerpt"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_220",
+  "turns": 2,
+  "tool_calls": 4,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 415,
+  "cache_read_tokens": 6524,
+  "cache_write_tokens": 3931,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "Neither analytics candidate has a record containing a subject identifier; all identifiers are null."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_4529",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_81",
+    "reason": "Support record with a message excerpt from the requester, who is identified by the subject's old email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_222",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 220,
+  "cache_read_tokens": 5429,
+  "cache_write_tokens": 1571,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_111",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_81",
+    "reason": "Support conversation message from requester about account access."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_246",
+  "turns": 2,
+  "tool_calls": 4,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 385,
+  "cache_read_tokens": 5276,
+  "cache_write_tokens": 1386,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence records tie either candidate to the subject."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_579",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_78",
+    "reason": "Support record with requester email and message excerpt: a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_249",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 345,
+  "cache_read_tokens": 5416,
+  "cache_write_tokens": 1705,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_8527",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_78",
+    "reason": "Customer analytics profile with audience cohort."
+   },
+   {
+    "resource_id": "support_1364",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_78",
+    "reason": "Support record with a message excerpt from the requester."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_251",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 424,
+  "cache_read_tokens": 5266,
+  "cache_write_tokens": 1478,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record links either candidate to the subject."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_4541",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_78",
+    "reason": "Support conversation message from the requester email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_263",
+  "turns": 3,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 8,
+  "output_tokens": 469,
+  "cache_read_tokens": 9054,
+  "cache_write_tokens": 1643,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_515",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_25",
+    "reason": "analytics profile"
+   },
+   {
+    "resource_id": "support_2498",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_25",
+    "reason": "support conversation"
+   },
+   {
+    "resource_id": "support_5234",
+    "data_category": "SUPPORT_ATTACHMENT",
+    "evidence_id": "evidence_25",
+    "reason": "ticket attachment"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_264",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 385,
+  "cache_read_tokens": 6048,
+  "cache_write_tokens": 2600,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "Only record for analytics_1851 shows the lookup_key and no subject identifier."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_9996",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_25",
+    "reason": "Message scan/message_read log keyed by user_262 support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_268",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 345,
+  "cache_read_tokens": 5772,
+  "cache_write_tokens": 2170,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "Only record for analytics_3793 has null identifiers; no subject identifier."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_8215",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_25",
+    "reason": "message_pii_scan on a support message containing the subject's email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_269",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 342,
+  "cache_read_tokens": 5592,
+  "cache_write_tokens": 2081,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_6766",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_25",
+    "reason": "analytics identity scan matched subject email"
+   },
+   {
+    "resource_id": "support_8301",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_25",
+    "reason": "message PII scan for subject; support conversation"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_270",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 233,
+  "cache_read_tokens": 5390,
+  "cache_write_tokens": 1424,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_7707",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_25",
+    "reason": "Support platform message PII scan record for the subject's email; a support conversation message."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_283",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 258,
+  "cache_read_tokens": 5298,
+  "cache_write_tokens": 1273,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_8408",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_76",
+    "reason": "Log shows an analytics profile read with audience cohort data."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_287",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 227,
+  "cache_read_tokens": 5320,
+  "cache_write_tokens": 1287,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_7432",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_76",
+    "reason": "Support ticket read log with requester email; a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_292",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 341,
+  "cache_read_tokens": 5913,
+  "cache_write_tokens": 2332,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "Only record for analytics_2322 has null identifiers; no grounding."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_1526",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_76",
+    "reason": "Support ticket read log keyed to user_290; a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_297",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 488,
+  "cache_read_tokens": 5812,
+  "cache_write_tokens": 2273,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence ties either account candidate to subject."
+   },
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "analytics_7164 record has no subject identifier."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_1983",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_75",
+    "reason": "Support record with message excerpt, customer_reference user_295."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_298",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 490,
+  "cache_read_tokens": 5704,
+  "cache_write_tokens": 2174,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No records tie either account to the subject."
+   },
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "The analytics_7164 record has no subject identifiers."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_643",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_75",
+    "reason": "Support record with a message excerpt and requester email, so it is a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_302",
+  "turns": 3,
+  "tool_calls": 4,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 8,
+  "output_tokens": 402,
+  "cache_read_tokens": 8906,
+  "cache_write_tokens": 1893,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_1133",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_75",
+    "reason": "Customer analytics profile with audience cohort"
+   },
+   {
+    "resource_id": "support_2983",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_75",
+    "reason": "Support record with message excerpt from requester"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_316",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 354,
+  "cache_read_tokens": 6071,
+  "cache_write_tokens": 3076,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record ties analytics_5532 to the subject's identifiers; the records show null identifiers or only a lookup key."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_1176",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_74",
+    "reason": "Support ticket message from the subject's email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_317",
+  "turns": 3,
+  "tool_calls": 4,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 8,
+  "output_tokens": 415,
+  "cache_read_tokens": 9144,
+  "cache_write_tokens": 2765,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_1488",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_74",
+    "reason": "Analytics platform profile with audience cohort."
+   },
+   {
+    "resource_id": "support_4439",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_74",
+    "reason": "Support ticket message excerpt from the requester."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_318",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 375,
+  "cache_read_tokens": 6062,
+  "cache_write_tokens": 3068,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record ties analytics_2601 to a subject identifier; the records have null identifiers or only a lookup key."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_7995",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_74",
+    "reason": "Support ticket message from the subject's email, asking to correct delivery details."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_34",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 262,
+  "cache_read_tokens": 3115,
+  "cache_write_tokens": 3562,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_9538",
+    "data_category": "SUPPORT_ATTACHMENT",
+    "evidence_id": "evidence_01",
+    "reason": "Attachment PII scan log refers to support_9538 as a ticket attachment."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_347",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 433,
+  "cache_read_tokens": 5343,
+  "cache_write_tokens": 1559,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence records tie any candidate to the subject."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_9474",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_71",
+    "reason": "Support ticket message from the requester's email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_348",
+  "turns": 2,
+  "tool_calls": 4,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 447,
+  "cache_read_tokens": 5441,
+  "cache_write_tokens": 1826,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence record for account_421 ties it to subject."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "analytics_9196",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_71",
+    "reason": "Analytics profile with audience cohort."
+   },
+   {
+    "resource_id": "support_2897",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_71",
+    "reason": "Support ticket message excerpt from requester."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_351",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 315,
+  "cache_read_tokens": 5795,
+  "cache_write_tokens": 2062,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "analytics_1072 record has no subject identifier"
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_7137",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_71",
+    "reason": "Support ticket conversation about account access"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_352",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 324,
+  "cache_read_tokens": 5630,
+  "cache_write_tokens": 1906,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "analytics_1072 record has no subject identifier"
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_3980",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_71",
+    "reason": "Support ticket message from requester email"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_364",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 225,
+  "cache_read_tokens": 5404,
+  "cache_write_tokens": 1380,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_9699",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_34",
+    "reason": "Message PII scan log on support platform for a support message."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_365",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 327,
+  "cache_read_tokens": 5588,
+  "cache_write_tokens": 2174,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_547",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_34",
+    "reason": "analytics profile scan log"
+   },
+   {
+    "resource_id": "support_3294",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_34",
+    "reason": "message scan log"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_366",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 344,
+  "cache_read_tokens": 5595,
+  "cache_write_tokens": 2107,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_8593",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_34",
+    "reason": "Analytics profile scan keyed by subject email"
+   },
+   {
+    "resource_id": "support_5609",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_34",
+    "reason": "Support message PII scan matched subject email"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_367",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 465,
+  "cache_read_tokens": 5535,
+  "cache_write_tokens": 2190,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_946",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_34",
+    "reason": "Analytics identity scan log matching subject email."
+   },
+   {
+    "resource_id": "support_4691",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_34",
+    "reason": "Support platform message PII scan log for subject email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_370",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 339,
+  "cache_read_tokens": 5712,
+  "cache_write_tokens": 2308,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_7215",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_34",
+    "reason": "analytics profile scan keyed by lookup_key"
+   },
+   {
+    "resource_id": "support_6949",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_34",
+    "reason": "support message PII scan"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_371",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 242,
+  "cache_read_tokens": 5396,
+  "cache_write_tokens": 1395,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_3110",
+    "data_category": "SUPPORT_ATTACHMENT",
+    "evidence_id": "evidence_34",
+    "reason": "Attachment PII scan of file delivery_confirmation_06.pdf on a support ticket."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_400",
+  "turns": 2,
+  "tool_calls": 4,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 423,
+  "cache_read_tokens": 5552,
+  "cache_write_tokens": 1922,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence record for account_928"
+   },
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "analytics_4455 record has no subject identifiers"
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_4521",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_69",
+    "reason": "Support conversation message from requester email"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_402",
+  "turns": 3,
+  "tool_calls": 4,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 8,
+  "output_tokens": 404,
+  "cache_read_tokens": 8928,
+  "cache_write_tokens": 1912,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_5811",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_69",
+    "reason": "Customer analytics profile with audience cohort"
+   },
+   {
+    "resource_id": "support_4290",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_69",
+    "reason": "Support record with a message excerpt from the requester"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_413",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 240,
+  "cache_read_tokens": 5388,
+  "cache_write_tokens": 1419,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_4523",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_39",
+    "reason": "Analytics platform profile scan log for analytics_4523, keyed by subject email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_414",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 226,
+  "cache_read_tokens": 5499,
+  "cache_write_tokens": 1416,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_3768",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_39",
+    "reason": "Support platform message PII scan log on a support message resource."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_415",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 344,
+  "cache_read_tokens": 5508,
+  "cache_write_tokens": 1855,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_2102",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_39",
+    "reason": "Analytics identity scan record for analytics platform resource"
+   },
+   {
+    "resource_id": "support_1993",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_39",
+    "reason": "Message PII scan on support platform"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_418",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 233,
+  "cache_read_tokens": 5385,
+  "cache_write_tokens": 1398,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_9464",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_39",
+    "reason": "Support platform message PII scan log for the subject's email; a support conversation message."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_419",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 233,
+  "cache_read_tokens": 5385,
+  "cache_write_tokens": 1396,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_2944",
+    "data_category": "SUPPORT_ATTACHMENT",
+    "evidence_id": "evidence_39",
+    "reason": "Attachment scan log for a support attachment, keyed by subject email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_44",
+  "turns": 2,
+  "tool_calls": 4,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 404,
+  "cache_read_tokens": 4029,
+  "cache_write_tokens": 5326,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "Both analytics records have null identifiers; no grounding."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_1066",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_94",
+    "reason": "Support ticket read log keyed to user_42; a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_443",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 449,
+  "cache_read_tokens": 5267,
+  "cache_write_tokens": 1483,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence record ties either candidate to the subject."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_8341",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_66",
+    "reason": "Support record with a message excerpt from the requester."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_446",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 338,
+  "cache_read_tokens": 5485,
+  "cache_write_tokens": 1766,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_195",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_66",
+    "reason": "Customer analytics profile with audience cohort."
+   },
+   {
+    "resource_id": "support_9938",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_66",
+    "reason": "Support conversation message from requester."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_450",
+  "turns": 3,
+  "tool_calls": 4,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 8,
+  "output_tokens": 403,
+  "cache_read_tokens": 8830,
+  "cache_write_tokens": 1855,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_8202",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_66",
+    "reason": "Audience cohort profile keyed by email"
+   },
+   {
+    "resource_id": "support_7245",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_66",
+    "reason": "Support record with a message excerpt from the requester"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_463",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 358,
+  "cache_read_tokens": 5582,
+  "cache_write_tokens": 2649,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_689",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_65",
+    "reason": "Record is an analytics profile with audience cohort."
+   },
+   {
+    "resource_id": "support_2659",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_65",
+    "reason": "Support ticket message excerpt keyed to user_461."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_464",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 418,
+  "cache_read_tokens": 6199,
+  "cache_write_tokens": 3339,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record ties analytics_8746 to a subject identifier; identifier fields are null."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_5586",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_65",
+    "reason": "Support ticket message keyed to user_462."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_47",
+  "turns": 2,
+  "tool_calls": 5,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 418,
+  "cache_read_tokens": 3204,
+  "cache_write_tokens": 3936,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence records for any candidate."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_5742",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_94",
+    "reason": "Support ticket read log keyed by requester email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_472",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 325,
+  "cache_read_tokens": 6019,
+  "cache_write_tokens": 2974,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record ties analytics_4066 to subject identifiers; all identifiers null."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_6987",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_65",
+    "reason": "Support ticket message from subject's email."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_496",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 319,
+  "cache_read_tokens": 5588,
+  "cache_write_tokens": 1863,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "analytics_5443 record has no subject identifiers"
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_6391",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_63",
+    "reason": "Support conversation with message excerpt from requester"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_498",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 317,
+  "cache_read_tokens": 5707,
+  "cache_write_tokens": 1978,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "analytics_6565 record has no subject identifier"
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_9075",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_63",
+    "reason": "Support conversation message excerpt from requester"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_50",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 240,
+  "cache_read_tokens": 3207,
+  "cache_write_tokens": 4241,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_7438",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_19",
+    "reason": "Screenshot of analytics profile with sessions, orders and audience data for the subject."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_51",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 347,
+  "cache_read_tokens": 3647,
+  "cache_write_tokens": 4509,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "Only record for analytics_2265 has null identifiers; no tie to subject."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_1097",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_94",
+    "reason": "Support ticket read log keyed by user_49; a support conversation."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_514",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 339,
+  "cache_read_tokens": 5396,
+  "cache_write_tokens": 1682,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_9920",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_48",
+    "reason": "analytics identity scan log on analytics profile"
+   },
+   {
+    "resource_id": "support_3982",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_48",
+    "reason": "message PII scan on support message"
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_515",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 448,
+  "cache_read_tokens": 5491,
+  "cache_write_tokens": 1778,
+  "changed": true,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "Only record for analytics_4804 has null identifiers; no subject identifier."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_4533",
+    "data_category": "SUPPORT_ATTACHMENT",
+    "evidence_id": "evidence_48",
+    "reason": "Log is an attachment_pii_scan of file delivery_confirmation_71.pdf, so the resource is a ticket attachment."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_520",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 234,
+  "cache_read_tokens": 5313,
+  "cache_write_tokens": 1200,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_9251",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_48",
+    "reason": "Log is a message_pii_scan on support platform resource, so it is a support message."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_521",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 269,
+  "cache_read_tokens": 5190,
+  "cache_write_tokens": 1082,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "analytics_7277",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_48",
+    "reason": "Log shows analytics_profile_read on analytics_7277, so it is an analytics profile."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_522",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 227,
+  "cache_read_tokens": 5232,
+  "cache_write_tokens": 1113,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_8538",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_48",
+    "reason": "Support platform message PII scan record; resource is a support message."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_61",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 307,
+  "cache_read_tokens": 2966,
+  "cache_write_tokens": 3492,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_001",
+    "data_category": "SUPPORT_ATTACHMENT",
+    "evidence_id": "evidence_58",
+    "reason": "Record is a PDF attachment (delivery_correction_attachment.pdf) for support ticket CS-4827."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_64",
+  "turns": 2,
+  "tool_calls": 3,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 339,
+  "cache_read_tokens": 3937,
+  "cache_write_tokens": 5407,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "analytics",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No record ties analytics_5718 to subject identifiers; identifiers null."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "support_6334",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_93",
+    "reason": "Support record with message excerpt, a conversation message."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_66",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 226,
+  "cache_read_tokens": 3184,
+  "cache_write_tokens": 3929,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_4249",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_93",
+    "reason": "Support conversation message with requester email and message excerpt."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_71",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 387,
+  "cache_read_tokens": 3171,
+  "cache_write_tokens": 3940,
+  "changed": true,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_1370",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_93",
+    "reason": "Record in support_records is a support conversation with requester email and message excerpt, not an attachment file."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_93",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 230,
+  "cache_read_tokens": 3284,
+  "cache_write_tokens": 3627,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_1824",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_89",
+    "reason": "Support ticket with message excerpt from requester about a delivery query."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_94",
+  "turns": 2,
+  "tool_calls": 2,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 6,
+  "output_tokens": 308,
+  "cache_read_tokens": 5402,
+  "cache_write_tokens": 1368,
+  "changed": false,
+  "choices": [],
+  "categories": [
+   {
+    "resource_id": "support_7691",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_89",
+    "reason": "Support ticket with message excerpt from requester about account access; a conversation, not an attachment."
+   }
+  ],
+  "rejected": []
+ },
+ {
+  "case_id": "case_95",
+  "turns": 3,
+  "tool_calls": 6,
+  "retries": 0,
+  "submitted": true,
+  "input_tokens": 8,
+  "output_tokens": 634,
+  "cache_read_tokens": 9157,
+  "cache_write_tokens": 2648,
+  "changed": false,
+  "choices": [
+   {
+    "kind": "account",
+    "resource_id": "none",
+    "evidence_id": "",
+    "reason": "No evidence record ties either account candidate to the subject."
+   }
+  ],
+  "categories": [
+   {
+    "resource_id": "analytics_1316",
+    "data_category": "ANALYTICS_PROFILE",
+    "evidence_id": "evidence_89",
+    "reason": "Analytics profile with audience cohort."
+   },
+   {
+    "resource_id": "support_5750",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_89",
+    "reason": "Support ticket message."
+   },
+   {
+    "resource_id": "support_7311",
+    "data_category": "SUPPORT_MESSAGE",
+    "evidence_id": "evidence_89",
+    "reason": "Support ticket message."
+   }
+  ],
+  "rejected": []
+ }
+]

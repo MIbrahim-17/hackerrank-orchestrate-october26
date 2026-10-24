@@ -251,3 +251,29 @@ Append-only. Each entry: what, why, alternatives rejected.
 - **Why:** The grader parses the file strictly; a broken row costs more than any model improvement.
 - **Check:** it passes on the --no-llm sample output and on the gold dataset/sample_output.csv, so it agrees with the official answers.
 - **Rejected:** A separate validation script (easy to forget to run).
+
+## 2026-10-25 — Routing option 1: agent only for unlabelled support_/analytics_ resources (supersedes option A)
+- **What:** `main.route_to_agent` sends a deletion case to the agent only if it owns a support_ or analytics_ resource with no explicit category label anywhere. Ambiguous ownership sets alone go to the validator. Routing lives in main.py, so the frozen files are unchanged; `agent.needs_agent` is no longer used. For routed cases the agent still sees any ambiguous sets in its frozen brief, and its choices are still validator-checked.
+- **Measured reason:** the agent answered "none" on 46 of 46 ambiguous sets (9 sample, 37 pilot), with 0 grounded picks, so it adds cost and nothing else there.
+- **Effect:** 84 of 508 deletion cases are routed, fewer than the earlier ~182 estimate, because structural collection labels now count as explicit (next entry). 8 are cached from the pilot. Projected total spend before the run: $0.9347 + 76 × $0.0118 ≈ $1.83, against the $4.50 cap.
+- **Rejected:** keeping all 352 (over the cap, about 10 fallbacks); lower effort (re-bills the pilot).
+
+## 2026-10-25 — Time principle: identity of a resource is stable, its state is not (reasoned, not sample-proven)
+- **What:** What a resource is (its owner and its category) may be learned from evidence of any time, including after audit_at. What state it is in comes only from evidence at or before audit_at. Post-audit evidence is never cited.
+- **Implementation (validator.py only):** `explicit_label()` returns a category stated by a source at any time, either a `record_type` field or a structural collection or table name that maps to a category (snapshot collection, SQL table or collection_name). Log event names, screenshot titles and PDF file names remain hints. `final_category()` applies explicit label > agent judgement > hint > prefix default, and is used only for step planning. `category_of()` is unchanged because it feeds the agent's frozen first message, so the pilot stays cached.
+- **Proof status:** **no sample proves this.** It is a reasoned choice, consistent with the proven ownership-only rule (8 sample resources depend on post-audit ownership). Samples are unchanged under it (status 100%, F1 96.79%, 0 extras).
+- **Effect:** case_431's support_3615 stays SUPPORT_ATTACHMENT (explicit `ticket_attachments` label in evidence_40), overriding the agent's SUPPORT_MESSAGE.
+- **Rejected:** categories from eligible evidence only (would let a generic view like `support_platform/tickets` beat a specific collection label); letting the agent override explicit labels.
+
+## 2026-10-25 — Full run (518) and two defects it exposed (fixes pending user decision)
+- **Run:** `python code/main.py` wrote output.csv. The built-in validation first failed: rows were sorted as text (case_100 before case_33). Fixed in main.py with a numeric sort key and re-run from cache at $0; validation OK.
+  - Status: INCOMPLETE 352, COMPLETE 156, NOT_APPLICABLE 10; 3,043 steps.
+  - Agent: 84 routed cases, 2.08 turns on average, 0 retries, 84/84 submitted, 0 ownership picks (42 "none"), 0 budget fallbacks.
+  - Spend after the run: $1.7270 total (Haiku $0.1030, Sonnet $1.5774, Flash $0.0465 free tier); this run cost $0.7923, all Sonnet.
+- **Changed vs baseline: 3 of 84.** No explicit label overrode an agent category; case_431 was not routed because its resource now has an explicit label.
+  - **case_515** (support_4533, message → attachment): correct. evidence_48 says `attachment_pii_scan … file="delivery_confirmation_71.pdf"`.
+  - **case_71** (support_1370, attachment → message): likely wrong. The agent read inventory `support_records` as a conversation, but that table is a generic view (support_2315 and support_2283 appear in both support_records and ticket_attachments). The only specific signal is a post-audit `attachment_scan` log.
+  - **case_119** (support_9309): not a real change. The baseline category itself is nondeterministic (next item).
+- **Defect 1, nondeterministic tie-break:** `category_of` and `explicit_label`-style code used `max(set(values), key=count)`. Python's per-process string-hash randomization makes the tie result vary between runs. It affects 1 owned resource (support_9309, case_119: one attachment hint, one message hint).
+- **Defect 2, pipe-format logs not parsed:** after the timestamp, operations_stream lines start with "| ", so the `LEVEL | service | trace | event | kv` branch never matched. Events were lost and lines were not grouped by trace, so lookup keys and resource IDs on different lines were never joined. An in-memory patch measured +25 owned resources in 16 eval cases (audit records, accounts, a legal hold), 0 lost, samples unchanged (99/111, 0 extras).
+- **Cost of fixing both:** 9 routed briefs change (case_213, 214, 216, 220, 514, 515, 520, 521, 522), about 9 × $0.0118 ≈ $0.11 re-billed, about $1.85 in total. The fixes touch evidence.py and `validator.category_of`, which feed the agent's first message, so they need the user's approval.

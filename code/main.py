@@ -24,7 +24,7 @@ from config import CACHE_DIR, OUTPUT_CSV
 from data import Request, load_activity, load_audit_log, load_manifest, load_requests
 from evidence import build_index
 from intent import classify_many
-from validator import OPERATIONS, CaseResult, validate_case
+from validator import OPERATIONS, CaseResult, deterministic_owned, explicit_label, validate_case
 
 STEP_KEYS = {"step_no", "phase", "system_id", "resource_id", "operation", "state", "evidence_id"}
 ALLOWED = {(phase, op, state) for phase, op, state in OPERATIONS}
@@ -35,8 +35,15 @@ def write_csv(path: Path, results: list[CaseResult]) -> None:
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["case_id", "deletion_status", "steps_json"])
-        for res in sorted(results, key=lambda x: x.case_id):
+        for res in sorted(results, key=lambda x: int(x.case_id.split("_")[1])):  # numeric: case_33 before case_100
             w.writerow([res.case_id, res.status, res.steps_json()])
+
+
+def route_to_agent(r: Request, index, links) -> bool:
+    """Agent only for an owned support_/analytics_ resource with no explicit label anywhere (DECISIONS 2026-10-25,
+    option 1). Ambiguous ownership sets alone go to the validator: the agent answered "none" on 46/46."""
+    return any(rid.split("_", 1)[0] in ("support", "analytics") and explicit_label(index, rid) is None
+               for rid in deterministic_owned(index, links, r))
 
 
 def validate_output(path: Path, requests: list[Request]) -> list[str]:
@@ -124,8 +131,8 @@ def main(argv: list[str] | None = None) -> int:
         baseline = validate_case(r, index, links[r.case_id], deletion)
         if args.no_llm or not deletion:
             return baseline
-        from agent import investigate, needs_agent  # imported lazily: --no-llm never needs it
-        if not needs_agent(r, index, links[r.case_id]):
+        from agent import investigate  # imported lazily: --no-llm never needs it
+        if not route_to_agent(r, index, links[r.case_id]):
             return baseline
         try:
             agent_result = investigate(r, index, links[r.case_id])

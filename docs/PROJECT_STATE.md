@@ -3,54 +3,50 @@
 Rewrite this file on every CHECKPOINT; keep it under 80 lines.
 
 ## Current phase
-Phase 5a done: routing (option A), budget guard, freeze, output validation, 40-case agent pilot.
-Phase 5b blocked on two user decisions (budget routing, post-audit categories); then full 518 run and reports.
+Phase 5b done: option 1 routing, time principle in the validator, full 518 run → valid output.csv.
+Phase 5c next: user decision on two defect fixes (≈$0.11), then re-run, reports, README, code.zip.
 
 ## Done
-- Phases 0–4: setup; analysis; evidence foundation; activity-row ownership linking; Haiku intent (38/38);
-  validator + --no-llm baseline; tools.py + agent.py (Sonnet 5.5).
-- Phase 5a:
-  - Routing: agent only when an ambiguous set or an unlabeled support_/analytics_ resource exists (352 of 508);
-    brief offers only support_/analytics_ resources for category judgement.
-  - Sample sequence mismatches (11) confirmed to be missing resources only; ordering is correct.
-  - llm.py hard budget guard: MAX_SPEND_USD (default 4.50) vs spend from the disk cache + in-flight + estimate;
-    BudgetExceeded → deterministic fallback, counted in main.py. Cache hits always allowed.
-  - Freeze: prompts.py, tools.py, agent.py pinned by SHA-256 in tests (changes re-bill cases).
-  - main.py validate_output(): full output contract; passes on baseline and on gold sample_output.csv.
-  - Pilot (40 routed eval cases): $0.0118/case, 2.02 turns, 0 retries, 37/37 ambiguous → "none", 1 change.
-  - 24 tests pass.
+- Phases 0–5a: setup; analysis; evidence foundation; activity-row ownership linking; Haiku intent (38/38);
+  validator + --no-llm baseline; tools.py + agent.py (frozen); budget guard; output validation; 40-case pilot.
+- Phase 5b:
+  - main.route_to_agent: agent only for an owned support_/analytics_ resource with no explicit label anywhere
+    (84 of 508 deletion cases); ambiguous sets go to the validator alone (46/46 "none").
+  - validator.explicit_label/final_category: explicit label (record_type or structural collection name, any time)
+    > agent > hint > prefix default; category_of untouched (feeds the frozen brief). Reasoned, not sample-proven.
+  - main.py numeric case_id sort (validation caught a text sort hidden by zero-padded sample ids).
+  - Full run: output.csv, 518 rows, validation OK; 0 budget fallbacks. 24 tests pass.
 
 ## Next step
-Waiting for the user on:
-a) Budget: remaining 312 routed cases ≈ $3.68 → total ≈ $4.62 > $4.50 cap. Options: (1, recommended) route only
-   the ~182 cases with an unlabeled support_/analytics_ resource (ambiguous sets gave 46/46 "none"); (2) keep 352
-   and accept ~10 guard fallbacks; (3) lower Sonnet effort (re-bills the pilot).
-b) Categories: should category evidence, like state, come only from records at or before audit_at? (case_431)
-Then: python code/main.py → output.csv (518 rows, validated); report status distribution, cost/tokens per model,
-fallbacks, changes by type, evidence trails for ≤5 changed cases; then evaluation_report.md, usage_report.md, README, code.zip.
+User decides whether to apply both defect fixes and re-run (python code/main.py):
+1. Deterministic tie-break in category_of (sorted before max) — affects support_9309 / case_119.
+2. Pipe-format log parsing ("| LEVEL | svc | trace | event | kv") in evidence.parse_log_line — +25 owned
+   resources in 16 eval cases, samples unchanged. Both re-bill 9 routed briefs (~$0.11) → total ≈ $1.85.
+Then: re-validate output.csv; add validator regression tests; write code/evaluation/evaluation_report.md
+(sample metrics, ≥3 custom cases, failures/fixes) and usage_report.md (final run tokens/cost per model);
+README run instructions; package code.zip.
 
 ## Confirmed rules
 Details: [docs/inferred_rules.md](inferred_rules.md); revisions in [docs/DECISIONS.md](DECISIONS.md) (authoritative).
 - Steps sorted by (operation-table index, system_id, resource_id); FINDING → REMEDIATION → VERIFICATION.
-- Policy by data_category, never by system or ID prefix; explicit source label wins over hint or agent choice.
-- Identity: full history, exact normalized match. Eligibility: manifest captured_at and record ts ≤ audit_at;
-  record ts ≥ requested_at. Post-audit and activity rows: ownership only, never state.
-- State: direct observation beats snapshot absence; no state evidence → uncited step.
-- Agent picks from an ambiguous set only with a cited grounding record; otherwise "none".
+- Policy by data_category; explicit label (any time) > agent judgement > hint.
+- Identity/category may come from any time; state only from evidence ≤ audit_at; post-audit never cited.
+- Eligibility: manifest captured_at and record ts ≤ audit_at; record ts ≥ requested_at.
+- Agent picks ownership only with a cited grounding record; otherwise "none".
 
 ## Open questions
-- (a) and (b) above.
-- case_431 / support_3615: attachment (post-audit evidence_40) vs generic ticket row (eligible evidence_68);
-  samples cannot settle it.
-- 3 sample resources unreachable (account_004, audit_record_6645, audit_record_5569): max 108/111.
-- "Lookup keys are not exposed data": kept, no proving sample case.
+- The two defect fixes above (user approval needed: they touch brief-building code).
+- case_71 / support_1370: agent chose SUPPORT_MESSAGE from a generic support_records row; the only specific
+  signal (attachment_scan) is a post-audit log hint. Likely wrong; no rule lets a hint override the agent.
+- 3 sample resources unreachable (max 108/111); "lookup keys are not exposed data" unproven.
 
 ## Latest scores
 - Samples (unchanged): status 100%; steps P 100% / R 93.78% / F1 96.79%; sequence 65.62%; 0 extras.
-- Pilot (40 eval cases): agent changed 1/40 vs baseline (uncertain).
-- Spend: $0.9347 priced total (Haiku $0.1030, Sonnet $0.7852, Flash $0.0465 free tier); cap $4.50.
+- Full run: INCOMPLETE 352 / COMPLETE 156 / NOT_APPLICABLE 10; 3,043 steps; agent changed 3/84
+  (case_515 right, case_71 likely wrong, case_119 spurious tie).
+- Spend: $1.7270 priced (Haiku $0.1030, Sonnet $1.5774, Flash $0.0465 free tier); cap $4.50.
 
 ## Known issues
-- No validator regression tests yet (baseline P=100% on samples, case_17 restore risk, case_31 snapshot absence).
-- validator.category_of reads evidence of any time (gap vs the ownership-only rule; see b).
-- docs/inferred_rules.md predates the 2026-10-25 decisions; DECISIONS.md wins where they differ.
+- Nondeterministic tie-break in validator.category_of (max over a set of strings).
+- operations_stream logs (pipe format) not parsed: events lost, lines not grouped by trace.
+- No validator regression tests yet; docs/inferred_rules.md predates the 2026-10-25 decisions.
