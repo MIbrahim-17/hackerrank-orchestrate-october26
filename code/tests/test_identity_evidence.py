@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from data import load_requests, read_csv  # noqa: E402
+from activity_links import build_activity_links  # noqa: E402
 from evidence import build_index  # noqa: E402
 from identity import email_hash, resolve_identity  # noqa: E402
 
@@ -97,6 +98,26 @@ class OwnershipTests(unittest.TestCase):
             r = REQUESTS[case_id]
             eligible, _ = INDEX.for_resource(rid, r.requested_at, r.audit_at)
             self.assertEqual({("evidence_92", "ABSENT")}, {(o.source_id, o.state) for o in eligible})
+
+
+class ActivityLinkTests(unittest.TestCase):
+    LINKS = build_activity_links(INDEX, list(REQUESTS.values()))
+
+    def test_emitted_links_are_correct(self) -> None:  # DECISIONS 2026-10-25: 14 recovered, 0 extras
+        gold = {r["case_id"]: {s["resource_id"] for s in json.loads(r["steps_json"])} for r in read_csv("sample_output.csv")}
+        emitted = {(c, x) for c in SAMPLES for link in self.LINKS[c].values() if link.status == "one" for x in link.candidates}
+        wrong = {(c, x) for c, x in emitted if x not in gold[c]}
+        self.assertFalse(wrong)
+        self.assertGreaterEqual(len(emitted), 14)
+
+    def test_status_filter_resolves_shared_window(self) -> None:  # case_31 COMPLETE/SUCCESS, case_32 PARTIAL/PARTIAL
+        self.assertEqual(("one", ("account_4857",)), (self.LINKS["case_31"]["account"].status, self.LINKS["case_31"]["account"].candidates))
+        self.assertEqual(("one", ("account_8858",)), (self.LINKS["case_32"]["account"].status, self.LINKS["case_32"]["account"].candidates))
+
+    def test_true_tie_stays_ambiguous(self) -> None:  # case_28/29: same reported_at, both NOT_STARTED -> FAILED rows
+        for case_id in ("case_28", "case_29"):
+            link = self.LINKS[case_id]["account"]
+            self.assertEqual(("ambiguous", ("account_5482", "account_7012")), (link.status, link.candidates))
 
 
 class StateTests(unittest.TestCase):

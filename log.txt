@@ -264,3 +264,84 @@ repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-
 worktree=main
 parent_agent=none
 
+## [2026-10-25T00:47:07+05:00] Activity-row linking rule, ungrounded check, intent classifier (quota-blocked)
+
+User Prompt (verbatim, secrets redacted):
+Good fixes from the spot check. Change of order: the 23 activity-only resources are about 21% of expected resources, so they come before intent tuning.
+I said earlier not to use activity timing. I am revising that because the gold answers clearly expect these resources. But the rule must be proven by the samples, not guessed. Do this in order:
+1. For all 23, show the linking activity row next to the case's requested_at, reported_at and audit_at. Look for an exact link first: identical timestamps, a shared ID, the same source_system, or wording in details that names the request or subject.
+2. If there is no exact link, test the strictest time rule that recovers them, for example deletion_worker events between requested_at and reported_at. Report for each candidate rule:
+   - resources recovered out of 23
+   - extras on the samples (must be zero)
+   - on the full 518 cases, how many cases get exactly one candidate, several, or none
+3. Pick the rule that recovers the most with zero sample extras. For cases with several candidates on the full dataset, do not guess in code. Mark them ambiguous so the agent can investigate later, with the validator checking its choice.
+4. Spend at most a short look on the 3 ungrounded resources (account_004, audit_record_6645, audit_record_5569). If nothing links them, accept the loss and note it in DECISIONS.md.
+5. Then build the Flash intent classifier. First measure the latency of one intent call at MINIMAL thinking. If it is more than a few seconds, run intent calls with a thread pool and cache every result. Tune the thinking level on the 32 samples plus 6 sentences of your own in at least 3 languages, until accuracy is 100%.
+Record the linking rule, its proof and the rejected alternatives in DECISIONS.md. Report the new found count out of 111 and extras.
+
+Agent Response Summary:
+Found no exact link: each of the 23 appears in exactly one deletion_worker row, in one of three detail templates at fixed offsets from reported_at. Measured rules A-D with and without elimination, skip-if-linked and global uniqueness. Chose per-template windows + skip-if-linked + evidence elimination + global uniqueness: 7/23 recovered, 0 extras, the other 16 inside ambiguous candidate sets (implemented in activity_links.py with 2 tests). Samples are now 92/111 with 0 extras, and the 3 ungrounded resources are accepted as lost. Built intent.py and intent_eval.py. MINIMAL thinking is rejected by the model (400), so LOW is the default. One call took 82s, so calls run in a thread pool. The eval stopped at the free-tier quota (20 requests/day) with 9/9 correct so far; this needs a user decision.
+
+Actions:
+* Scratch experiments (activity_rules.py) in session scratchpad
+* Created code/activity_links.py, code/intent.py, code/evaluation/intent_eval.py; edited identity.py, prompts.py, config.py, tests (21 pass)
+* Gemini calls: 1 rejected (MINIMAL), 9 intent results cached, then 429 quota
+* Appended docs/DECISIONS.md (3 entries); updated docs/PROJECT_STATE.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T00:56:44+05:00] Intent to Haiku; activity linking via propagation + status filter
+
+User Prompt (verbatim, secrets redacted):
+Decisions:
+1. I cannot enable Gemini billing now. Move intent classification to claude-haiku-5-5 with structured JSON output, keep the 11 cached Flash transcriptions as they are, and update config.py pricing and DECISIONS.md. Then run the intent evaluation on the 32 samples plus your 6 sentences.
+2. The ambiguity counts (243 accounts, 206 analytics) are too high to push into the agent. Use one more fact: each deletion_worker row serves exactly one request. Implement constraint propagation across all 550 requests: assign every unique candidate, remove that row from all other cases' candidate sets, and repeat until nothing changes. Report after each pass. If ambiguity remains, test a one-to-one bipartite matching that minimises distance from each wording's expected offset to reported_at.
+For each approach, report:
+- recovered out of the 23 sample resources
+- extras on the samples (must stay zero)
+- on the 518: one, ambiguous, none, already linked, for accounts and analytics separately
+Keep the approach with the most recovered and zero extras. Whatever stays ambiguous goes to the agent with the validator checking. Record the method, its proof and the rejected options in DECISIONS.md.
+
+Agent Response Summary:
+Moved intent to claude-haiku-5-5 with json_schema output (pricing added to config.py). Tuning gave 37/38 at disabled/low and adaptive/low (case_27 missed) and 38/38 at adaptive/medium, which is now the default. Ran intent on all 518 (508 deletion, 10 not, matching the 10 CLASSIFY_REQUEST rows). Constraint propagation converged in 1 pass with no gain (7/23); case singletons gave 3 extras; bipartite matching settled 0 cases because every ambiguous component shares one reported_at. A new grounded constraint (account row result matches reported_status: 35/35 on the samples) plus propagation and NA exclusion gave 14/23 recovered and 0 extras, so samples are at 99/111 with 0 extras and ambiguous accounts on the 518 fell from 243 to 115 (analytics stay at 200).
+
+Actions:
+* Edited code/llm.py (thinking, output_format), code/config.py (Haiku model, pricing, intent defaults), code/prompts.py, code/intent.py, code/evaluation/intent_eval.py, code/activity_links.py, tests (22 pass)
+* Haiku calls: 4 intent eval runs (38 each) + 518 intents; all cached
+* Scratch experiments propagate.py (propagation, matching) in session scratchpad
+* Appended docs/DECISIONS.md (2 entries); updated docs/PROJECT_STATE.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T00:58:25+05:00] CHECKPOINT: phase 3 state, decisions, memory
+
+User Prompt (verbatim, secrets redacted):
+CHECKPOINT. Update docs/PROJECT_STATE.md for the phase we just finished: what is done, the latest sample score if it changed, open questions, and the exact next step. Append new decisions to docs/DECISIONS.md. Save only durable lessons to auto memory. Show me the diff of PROJECT_STATE.md.
+
+Agent Response Summary:
+Rewrote docs/PROJECT_STATE.md (55 lines): phase 3 is done (activity-row ownership linking, Haiku intent), the sample score is 99/111 with 0 extras (was 92), the next step is tools.py, then the agent loop, validator, main.py and the first scored sample run. Also corrected the outdated rule "activity timing is never used". Appended the pipeline-order decision (intent before activity linking, all 550 requests in the linking set). Saved two durable lessons: cross-tabulate categorical fields before timing heuristics, and probe API quota before bulk calls.
+
+Actions:
+* Rewrote docs/PROJECT_STATE.md; appended docs/DECISIONS.md
+* Wrote memory: categorical-links-before-timing.md, check-api-quota-before-bulk.md; updated MEMORY.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+

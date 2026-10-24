@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import re
 from dataclasses import dataclass
+from functools import lru_cache
 
 from data import load_audit_log, load_identities
 
@@ -101,6 +102,12 @@ def _identifiers_for(user_id: str) -> list[Identifier]:
         if ident.kind == "email":
             add("hash", email_hash(ident.value), ident.current, "derived")
     return sorted(found.values(), key=lambda i: (i.kind, not i.current, i.value))
+
+
+@lru_cache(maxsize=1)
+def identifier_owners() -> dict[str, str]:
+    """Normalized identifier key -> user_id, over every user's full history (no identifier is shared)."""
+    return {i.key: user_id for user_id in load_identities() for i in _identifiers_for(user_id)}
 
 
 def _email_chain(user_id: str) -> list[str]:

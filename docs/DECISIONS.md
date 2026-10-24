@@ -108,3 +108,77 @@ Append-only. Each entry: what, why, alternatives rejected.
 - **What:** When a screenshot shows a resource as a table row and also in a detail panel (e.g. search_428, data_flow_1121, export_1260, backup_9287, audit_record_003), both become observations from the same file. Screens without resource IDs (evidence_42 user_17 reference registry, evidence_46 object listing) produce no observations, but their transcription stays readable via `index.documents` for `read_image_or_pdf`.
 - **Why:** The detail panel carries more fields (paths, retention end, timestamps). Both observations come from the same file and capture time, so they never disagree on eligibility or citation.
 - **Rejected:** Merging rows and panels (extra code, no gain); inventing resource IDs for ID-less screens.
+
+## 2026-10-25 — Activity-row linking for resources no evidence ties to the subject (revises "no activity timing")
+- **Context:** 23 of 111 expected sample resources (accounts seen only as a 404 or not at all, and anonymized analytics with every identifier null) are tied to their case only by a deletion_worker activity row. The user revised the earlier ban on activity timing because the gold answers expect these resources, on condition that the rule is proven by the samples.
+- **Exact links first (none found):** each of the 23 appears in exactly one activity row. No row shares a timestamp with requested_at, reported_at or audit_at, no row names a second resource, and the details never name the subject or the request. All 23 come from source_system `deletion_worker`, with three detail templates: "reported the requested operation as completed" or "completed some internal work" (case_01–10 style, reported_at ±0.1h); "submitted primary profile <account>" (reported_at −1.25h to −0.75h); "Policy action completed for <analytics>" (about −0.48h).
+- **Rule (code/activity_links.py):**
+  - **Windows per detail template, relative to reported_at:** completed ±15 min; submitted primary profile −1.5h to −0.5h; policy action −0.6h to −0.4h.
+  - **Kinds:** account = DELETE_RECORD on account_service; analytics = ANONYMIZE_RECORD on analytics_platform.
+  - **Skip** a kind that evidence already links to the subject.
+  - **Exclude** a candidate whose evidence ties it to a different user.
+  - **Emit** only when the window holds exactly one candidate and no other request's window (all 550 requests) contains it. Any other non-empty window is **ambiguous**: the candidates go to the agent and the validator checks its choice.
+  - The rows prove ownership only, never state.
+- **Proof (samples):** 7/23 recovered (account_001, 002, 007, 008, 010, 4163, analytics_901) with **0 extras**. The other 16 targets are all inside their case's ambiguous candidate set. Total: **92/111 found, 0 extras**.
+- **Full dataset (518 cases):**
+  - accounts: 241 already linked by evidence, 30 exactly one, 243 ambiguous, 4 none;
+  - analytics: 73 linked, 17 one, 206 ambiguous, 222 none.
+  - Caveat: an ambiguous analytics set can belong to a case that has no anonymized analytics at all (samples case_09, 19, 20, 23), so the agent must also be able to choose "none".
+- **Rejected alternatives (all measured on the samples):**
+  - **A** [requested_at, reported_at], or **B** with +10 min: misses the case_01–10 rows that land after reported_at. Under the emit rule, 0/23 recovered.
+  - **D without global uniqueness:** 4–6 extras, all analytics (a neighbour case's anonymize row in the window, e.g. analytics_5335 of case_21 in case_23's window).
+  - **D without skip-if-linked:** extras for case_11 and case_18 (another case's anonymize row next to the case's own evidence-linked analytics).
+  - **C** [reported_at −1.5h, +10m]: same 7/23 and 0 extras, but more ambiguity on eval (30 vs 47 single-candidate cases), so D was chosen.
+  - **Ordering heuristics** (row order vs requested_at or case_id) to break ties: inconsistent across case_18/20, case_31/32 and case_24/25/26, so rejected as guessing.
+
+## 2026-10-25 — Accepted loss: 3 ungrounded sample resources
+- **What:** account_004 (case_04), audit_record_6645 (case_18) and audit_record_5569 (case_20) are not reproduced.
+- **Why:** None of them appears in any participant file except sample_output.csv. The only numeric matches are unrelated: support_5569 is case_18's own support record, and account_6645 is a February deletion (activity_561). case_04 has no deletion_worker DELETE_RECORD row in any window.
+- **Effect:** at most 108/111 resources are reachable on the samples.
+
+## 2026-10-25 — Intent classifier (Flash): thinking level LOW; blocked by free-tier quota
+- **What:** `code/intent.py` makes a single-shot call to gemini-3.8-flash with a JSON schema (`intent` enum: DELETION, DATA_ACCESS, DATA_EXPORT, CORRECTION, MARKETING_OPT_OUT, OTHER) and runs batches in a thread pool. The decision is `intent == "DELETION"`; `authorizes_deletion` is forced to agree with it. The prompt encodes what the samples prove: verifying or finishing an earlier deletion (case_25, case_28) and deleting one copy (case_08 export) are deletion requests. `code/evaluation/intent_eval.py` runs the 32 samples plus 6 custom sentences (en, fr, es, ja): export, unsubscribe, close-but-keep-order-history, access, correction, and "unsubscribe but do not delete".
+- **Thinking level:** MINIMAL is rejected by the model (400 "Thinking level MINIMAL is not supported for this model"), so LOW is the lowest available level and the default. Accuracy at LOW is not yet confirmed at 100%.
+- **Measured:** one intent call at LOW took 82s for 257 input and 42 output tokens; image calls took 136–183s. The latency comes from the API, not from thinking.
+- **Blocker:** the GOOGLE_API_KEY in `.env` is on the Gemini **free tier: 20 generate_content requests per day per model**. The quota was used by 11 image transcriptions and 9 intent calls (all 9 correct so far). The rest of the evaluation, and the 518-case run, need a paid tier or a different plan. This is waiting on a user decision.
+
+## 2026-10-25 — Intent classification moved to claude-haiku-5-5 (supersedes the Flash intent entry)
+- **What:** `intent.py` calls claude-haiku-5-5 through `call_claude` with structured output (`output_config.format` json_schema, `additionalProperties: false`), cached and run in a thread pool. The 11 cached Flash image transcriptions stay as they are; Flash is now used only for images. Haiku pricing was added to config.py: $0.10 in / $0.50 out / $0.01 cache read / $0.125 cache write per MTok (prompts ≤100K tokens), from the claude-api skill migration guide, looked up 2026-10-25.
+- **Why:** The Gemini key is free tier (20 requests/day) and billing can't be enabled now (user decision). Haiku answers in about 3s against about 82s for Flash.
+- **Tuning (32 samples + 6 custom sentences in en, fr, es, ja):**
+  - thinking disabled, effort low: 37/38 (misses case_27, "audit the deletion as it stood…", labelled OTHER);
+  - adaptive, low: 37/38 (same miss);
+  - **adaptive, medium: 38/38**;
+  - adaptive, high: 38/38.
+  - The default is adaptive/medium, the lowest setting at 100%. All 6 custom sentences were right at every level.
+- **518 run:** 508 DELETION and 10 non-deletion (3 CORRECTION, 3 DATA_ACCESS, 2 MARKETING_OPT_OUT, 1 DATA_EXPORT, 1 OTHER). The 10 match the 10 `CLASSIFY_REQUEST … non-deletion` activity rows by count, and all 10 texts were read and confirmed.
+- **Rejected:** a prompt tweak for "audit" wording (raising effort fixed it without fitting the prompt to one sample); Sonnet for intent (more cost for a single-shot classification).
+- **Known waste:** top-level cache_control writes about 700 tokens per intent call that are never read back (about $0.046 of the $0.06 the 518 run cost).
+
+## 2026-10-25 — Activity linking: constraint propagation + workflow-status filter (supersedes the "emit only unique" rule)
+- **Method (code/activity_links.py):**
+  - per-template windows, evidence elimination and skip-if-linked, as before;
+  - **NOT_APPLICABLE cases claim no rows** (Haiku intent);
+  - **account rows must match the case's reported_status:** COMPLETE needs SUCCESS, NOT_STARTED needs FAILED, PARTIALLY_COMPLETE needs PARTIAL or SUCCESS;
+  - **constraint propagation:** each deletion_worker row serves exactly one request. A row in exactly one open case's window goes to that case and leaves every other set, repeated until stable. What remains is ambiguous and goes to the agent, with the validator checking its choice.
+- **Proof of the status filter:** across every sample account row, COMPLETE↔SUCCESS 20/20, NOT_STARTED↔FAILED 12/12, PARTIALLY_COMPLETE↔PARTIAL 3 / SUCCESS 2. It is a semantic link (the workflow's reported status summarizes that delete row), not a timing assumption. Analytics rows show no such relation (COMPLETE: FAILED 12, SUCCESS 4; NOT_STARTED: FAILED 3, SUCCESS 3), so the filter applies to accounts only.
+- **Results (samples recovered / 23, sample extras; 518 one / ambiguous / none / linked):**
+
+  | Approach | Recovered / 23 | Extras | Accounts on the 518 | Analytics on the 518 |
+  |---|---|---|---|---|
+  | Previous rule (emit only unique) | 7 | 0 | 30 / 243 / 4 / 241 | 17 / 206 / 222 / 73 |
+  | Propagation (row singletons) | 7 | 0 | 50 / 223 / 4 / 241 | 19 / 204 / 222 / 73 |
+  | + NOT_APPLICABLE excluded | 7 | 0 | 50 / 223 / 4 / 231 (+10 n/a) | 20 / 200 / 215 / 73 |
+  | **+ status filter (chosen)** | **14** | **0** | **158 / 115 / 4 / 231** (+10 n/a) | **20 / 200 / 215 / 73** |
+
+  Samples overall: **99/111 found, 0 extras.**
+- **Rejected:**
+  - **Case singletons** (a case with one remaining candidate takes it): 8/23 but 3 extras (case_09, case_19, case_20 analytics; cases with no analytics grab a neighbour's row).
+  - **One-to-one min-cost bipartite matching** on |offset − expected offset per template|: settles **0** cases. Every remaining ambiguous component (90 for accounts, 80 for analytics before the status filter) shares a single identical reported_at, so the cost is the same for every case in a component and all optimal assignments tie.
+  - **Ordering heuristics:** inconsistent on the samples.
+- **Remaining ambiguity is irreducible from timing:** 115 account and 200 analytics cases on the 518. Sample examples: case_28/case_29 (both NOT_STARTED, same reported_at, {account_5482, account_7012}) and case_24/25/26 analytics {analytics_1895, analytics_4566}. An analytics set can belong to a case with no anonymized analytics at all (case_09, case_19, case_20, case_23), so the agent must be allowed to answer "none".
+
+## 2026-10-25 — Pipeline order: intent for every request before activity linking
+- **What:** main.py will classify intent for all requests first, then call `build_activity_links(index, all_requests, non_deletion=<NOT_APPLICABLE case_ids>)`, then run the per-case agent only for deletion requests. Sample requests are always included in the linking set, because uniqueness and propagation are global across the 550 requests in the shared activity stream.
+- **Why:** NOT_APPLICABLE cases own no deletion_worker rows but their windows overlap neighbours'. Excluding them is grounded (10 Haiku non-deletion = 10 CLASSIFY_REQUEST rows). Linking is deterministic and cheap (≈2s), so it runs once per run.
+- **Rejected:** Linking per case inside the agent (the constraints are global); excluding sample requests from the linking set (their rows would then look unclaimed to eval cases).

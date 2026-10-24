@@ -70,14 +70,23 @@ def _client(provider: str) -> Any:
 
 def call_claude(*, purpose: str, case_id: str, system: list[dict] | str, messages: list[dict],
                 tools: list[dict] | None = None, max_tokens: int = 16000, effort: str = CLAUDE_EFFORT,
-                model: str = CLAUDE_MODEL) -> dict[str, Any]:
-    """One Messages API turn. Returns the response as a plain dict (content blocks can be appended to messages as-is)."""
+                model: str = CLAUDE_MODEL, thinking: dict | None = None,
+                output_format: dict | None = None) -> dict[str, Any]:
+    """One Messages API turn. Returns the response as a plain dict (content blocks can be appended to messages as-is).
+
+    `output_format` is a JSON schema for structured output (the reply's text block is then valid JSON).
+    """
+    output_config: dict[str, Any] = {"effort": effort}
+    if output_format:
+        output_config["format"] = {"type": "json_schema", "schema": output_format}
     request: dict[str, Any] = {
         "model": model, "max_tokens": max_tokens, "system": system, "messages": messages,
-        "output_config": {"effort": effort}, "cache_control": {"type": "ephemeral"},
+        "output_config": output_config, "cache_control": {"type": "ephemeral"},
     }
     if tools:
         request["tools"] = tools
+    if thinking:
+        request["thinking"] = thinking
     path = _cache_file("anthropic", request)
     cached = _load(path)
     if cached is None:

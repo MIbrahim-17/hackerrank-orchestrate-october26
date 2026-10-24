@@ -40,3 +40,33 @@ IMAGE_TRANSCRIPTION_SCHEMA = {
     },
     "required": ["application", "page_title", "subtitle", "records", "other_text"],
 }
+
+INTENT_SYSTEM = """You classify one customer privacy request written to an online shop. It may be in any language.
+Decide whether the person authorizes deletion of their account or personal data.
+
+authorizes_deletion = true when the person asks to delete, erase, remove or close their account or personal data,
+including when they:
+- ask to delete only some copies (a search result, an export file, a support attachment, old identifiers);
+- ask to verify, check, finish or repair a deletion they already requested;
+- add a retention preference ("keep my order history", "you may keep backups or anonymous statistics").
+
+authorizes_deletion = false when the request is only about:
+- access or a copy of their data, a data export or download (DATA_ACCESS / DATA_EXPORT);
+- correcting or updating details (CORRECTION);
+- unsubscribing from marketing emails, newsletters or SMS (MARKETING_OPT_OUT);
+- anything else that does not ask for deletion (OTHER).
+Judge what the person asks for, not words they mention in passing.
+"""
+
+INTENT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "intent": {"type": "string",
+                   "enum": ["DELETION", "DATA_ACCESS", "DATA_EXPORT", "CORRECTION", "MARKETING_OPT_OUT", "OTHER"]},
+        "authorizes_deletion": {"type": "boolean"},
+        "language": {"type": "string", "description": "ISO 639-1 code of the request"},
+        "reason": {"type": "string", "description": "one short sentence"},
+    },
+    "required": ["intent", "authorizes_deletion", "language", "reason"],
+    "additionalProperties": False,
+}

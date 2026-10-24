@@ -17,7 +17,9 @@ OUTPUT_CSV = REPO_ROOT / "output.csv"
 CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-sonnet-5-5")
 CLAUDE_EFFORT = os.getenv("CLAUDE_EFFORT", "medium")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
-GEMINI_INTENT_THINKING = os.getenv("GEMINI_INTENT_THINKING", "MINIMAL")  # lowest level that keeps intent at 100% on samples
+INTENT_MODEL = os.getenv("INTENT_MODEL", "claude-haiku-5-5")
+INTENT_THINKING = os.getenv("INTENT_THINKING", "adaptive")  # disabled/low and adaptive/low miss case_27
+INTENT_EFFORT = os.getenv("INTENT_EFFORT", "medium")  # lowest effort with 38/38 on samples + custom
 GEMINI_IMAGE_THINKING = os.getenv("GEMINI_IMAGE_THINKING", "LOW")
 
 # USD per 1M tokens. "cache_read" = cached input; "cache_write" = Anthropic 5-minute cache write (1.25x input).
@@ -25,6 +27,10 @@ PRICES: dict[str, dict[str, float | str | None]] = {
     "claude-sonnet-5-5": {
         "provider": "anthropic", "input": 2.00, "output": 10.00, "cache_read": 0.20, "cache_write": 2.50,
         "source": "claude-api skill model table (cached 2026-10-06); looked up 2026-10-24",
+    },
+    "claude-haiku-5-5": {
+        "provider": "anthropic", "input": 0.10, "output": 0.50, "cache_read": 0.01, "cache_write": 0.125,
+        "source": "claude-api skill migration guide (prompts <=100K tokens; $0.50/$2.50 above), looked up 2026-10-25",
     },
     "gemini-3.8-flash": {
         "provider": "google", "input": 0.75, "output": 3.75, "cache_read": 0.075, "cache_write": None,
