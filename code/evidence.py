@@ -45,6 +45,8 @@ PREFIX_SYSTEM = {
 # Collection / table / log-event hints -> data_category. Only confident mappings; the agent decides the rest.
 CATEGORY_HINTS = [
     ("deleted_customer_references", "ACCOUNT_TOMBSTONE"), ("ticket_attachment", "SUPPORT_ATTACHMENT"),
+    ("contact_", "SECONDARY_IDENTIFIER"),  # contact lookups keyed by an identifier: analytics_9914, support_002 (gold DELETE)
+    ("message_", "SUPPORT_MESSAGE"),
     ("attachment", "SUPPORT_ATTACHMENT"), ("support_conversations", "SUPPORT_MESSAGE"),
     ("support_ticket", "SUPPORT_MESSAGE"), ("security_audit", "SECURITY_AUDIT_LOG"), ("audit_record", "SECURITY_AUDIT_LOG"),
     ("retained_order", "LEGAL_HOLD_RECORD"), ("backup", "BACKUP_ARCHIVE"), ("restore", "BACKUP_ARCHIVE"),
@@ -242,6 +244,9 @@ def infer_state(fields: dict[str, Any], record_type: str | None) -> str:
         return "ABSENT"
     if "restore_allowed" in leaves and _truthy(leaves["restore_allowed"]) is not None:
         return "RESTORABLE" if _truthy(leaves["restore_allowed"]) else "BLOCKED"
+    if "deletion_block" in leaves and _truthy(leaves["deletion_block"]) is not None:  # restore_candidate_evaluated logs
+        return "BLOCKED" if _truthy(leaves["deletion_block"]) else (
+            "RESTORABLE" if _truthy(leaves.get("eligible", "true")) is not False else "BLOCKED")
     if "enabled" in leaves and _truthy(leaves["enabled"]) is not None:
         return "ACTIVE" if _truthy(leaves["enabled"]) else "DISABLED"
     if record_type == "DATA_FLOW":  # consoles show connector status words instead of an enabled flag
@@ -388,6 +393,15 @@ def parse_json(f: EvidenceFile, index: EvidenceIndex) -> list[Observation]:
     return out
 
 
+# Typed inventory tables -> the system they snapshot (used for empty tables, which have no rows to infer from).
+INVENTORY_TABLE_SYSTEM = {
+    "customer_profiles": "account_service", "customer_search_documents": "search_service",
+    "customer_analytics_profiles": "analytics_platform", "support_records": "support_platform",
+    "customer_exports": "export_service", "connector_subscriptions": "integration_service",
+    "backup_restore_entries": "backup_service", "security_audit_records": "security_service",
+}
+
+
 def parse_sql(f: EvidenceFile, index: EvidenceIndex) -> list[Observation]:
     script = f.path.read_text(encoding="utf-8")
     m = re.search(r"Captured at:\s*(\S+)", script)
@@ -395,21 +409,31 @@ def parse_sql(f: EvidenceFile, index: EvidenceIndex) -> list[Observation]:
     con = sqlite3.connect(":memory:")
     con.executescript(script)
     con.row_factory = sqlite3.Row
+    tables = [t for (t,) in con.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
+    scope = None
+    if "snapshot_scope" in tables:  # inventory: only systems listed in scope are covered
+        scope = {r["origin_system"] for r in con.execute("SELECT origin_system FROM snapshot_scope")}
     out = []
-    for (table,) in con.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").fetchall():
-        rows = [dict(r) for r in con.execute(f'SELECT * FROM "{table}"')]
-        if table == "snapshot_scope" or not rows or "resource_id" not in rows[0]:
+    for table in tables:
+        if table == "snapshot_scope":
             continue
+        rows = [dict(r) for r in con.execute(f'SELECT * FROM "{table}"')]
+        covered: dict[str, set[str]] = defaultdict(set)
+        if table in INVENTORY_TABLE_SYSTEM:
+            covered[INVENTORY_TABLE_SYSTEM[table]]  # an empty in-scope table still proves absence
         for row in rows:
             fields = dict(row)
             if isinstance(fields.get("record_json"), str):
                 fields.update(json.loads(fields.pop("record_json")))
             collection = f"{table}:{fields.get('collection_name', '')}".rstrip(":")
             system = fields.get("origin_system")
-            out.append(_obs(f, f.file_id, f.captured_at, snap_ts, fields["resource_id"], collection, fields,
-                            system_id=system if isinstance(system, str) else None))
-        index.coverage.append(Coverage(f.file_id, f.captured_at, snap_ts, PREFIX_SYSTEM.get(rows[0]["resource_id"].rsplit("_", 1)[0], ""),
-                                       table, frozenset(r["resource_id"] for r in rows)))
+            obs = _obs(f, f.file_id, f.captured_at, snap_ts, fields["resource_id"], collection, fields,
+                       system_id=system if isinstance(system, str) else None)
+            out.append(obs)
+            covered[obs.system_id].add(obs.resource_id)
+        for system, rids in covered.items():
+            if scope is None or system in scope:
+                index.coverage.append(Coverage(f.file_id, f.captured_at, snap_ts, system, table, frozenset(rids)))
     con.close()
     return out
 
@@ -422,7 +446,7 @@ def pdf_text(path: Path) -> str:
 def parse_document(f: EvidenceFile, text: str) -> list[Observation]:
     """PDFs are single-subject business documents: every resource they mention gets the document's identifiers."""
     idents = identifiers_in(text)
-    return [_obs(f, f.file_id, f.captured_at, f.captured_at, rid, "document", {"document": f.path.name},
+    return [_obs(f, f.file_id, f.captured_at, f.captured_at, rid, f"document:{f.path.name}", {"document": f.path.name},
                  extra_identifiers=idents, snippet=text[:600]) for rid in dict.fromkeys(RID_RE.findall(text))]
 
 

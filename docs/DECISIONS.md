@@ -182,3 +182,38 @@ Append-only. Each entry: what, why, alternatives rejected.
 - **What:** main.py will classify intent for all requests first, then call `build_activity_links(index, all_requests, non_deletion=<NOT_APPLICABLE case_ids>)`, then run the per-case agent only for deletion requests. Sample requests are always included in the linking set, because uniqueness and propagation are global across the 550 requests in the shared activity stream.
 - **Why:** NOT_APPLICABLE cases own no deletion_worker rows but their windows overlap neighbours'. Excluding them is grounded (10 Haiku non-deletion = 10 CLASSIFY_REQUEST rows). Linking is deterministic and cheap (≈2s), so it runs once per run.
 - **Rejected:** Linking per case inside the agent (the constraints are global); excluding sample requests from the linking set (their rows would then look unclaimed to eval cases).
+
+## 2026-10-25 — Prompt caching off for single-shot intent calls
+- **What:** `call_claude(prompt_cache=False)` omits the top-level `cache_control` marker; intent.py uses it. The disk cache is unchanged. `llm.OFFLINE` makes any disk-cache miss raise instead of calling the API (used by `--no-llm`).
+- **Why:** Each intent call wrote about 700 cache tokens that were never read (about $0.05 of $0.06 per 518 run). After the change: intent eval still 38/38; the 518 re-run cost 369 live calls, 282K input and 22K output tokens, 0 cache writes (149 hits from identical request texts).
+
+## 2026-10-25 — Validator first; deterministic --no-llm baseline
+- **What:** validator.py turns owned resources into steps.
+  - **Ownership:** evidence, refs, post-audit ownership-only, activity "one" links, or a grounded agent choice.
+  - **Category:** explicit source label > agent override (only without a label) > collection or prefix hint.
+  - **State:** latest eligible direct observation > absence from the latest eligible full collection snapshot of that system > UNKNOWN (uncited).
+  - **Policy:** deletion_rules.csv by category, with DATA_FLOW → disable and BACKUP_ARCHIVE → block restore.
+  - **Steps:** violations give finding + remediation + verification; compliant resources give verification only. Status is INCOMPLETE if any finding. Steps are sorted by (operation index, system_id, resource_id).
+  - **Citations:** findings and COMPLETE verifications are cited; INCOMPLETE remediation and verification stay "".
+- **Evidence fixes it needed (each proven on a sample):**
+  - **Restore state from `deletion_block` and `eligible`:** `restore_candidate_evaluated eligible=true deletion_block=false` means RESTORABLE (case_17, backup_3245 was wrongly verify-only).
+  - **"contact_" lookups → SECONDARY_IDENTIFIER (DELETE):** analytics_9914 in case_12 and support_002 in case_10, both gold DELETE. **"message_" scans → SUPPORT_MESSAGE.**
+  - **PDF collection carries the file name:** delivery_correction_attachment.pdf → SUPPORT_ATTACHMENT (case_07).
+  - **Collection snapshots per system:** an inventory file counts only for systems in its `snapshot_scope`, and an empty in-scope table still proves absence. This yields evidence_51 (empty profiles, case_31) and evidence_54 (case_01, 02).
+  - **Direct observations beat snapshot absence:** case_21 cites the evidence_92 404, not the later evidence_51 snapshot.
+- **Baseline (`main.py --sample --no-llm`):** status 32/32 (100%); step P 100%, R 93.78%, F1 96.79% (181/193); sequence 65.62% (21/32); fields: phase 93.8%, system_id and resource_id 82.9%, operation and state 84.5%, evidence_id 93.3%. **0 extras.** The 12 missing steps are exactly the 9 resources in ambiguous sets plus the 3 unreachable ones.
+
+## 2026-10-25 — Agent (Sonnet 5.5) as specified; result on the samples
+- **What:** tools.py (6 read-only tools bound to the case's gates, plus a strict submit_findings) and agent.py (pre-fetched brief: identity, linked resources with category, state and evidence, ambiguous sets with every record of each candidate; cap of 6 turns; at most 2 validator retries). A choice from an ambiguous set needs a cited record containing the candidate plus a subject identifier or the exact full name, either eligible or ownership-only after audit_at. Otherwise the answer is "none", and the validator rejects ungrounded choices.
+- **32-sample result:** identical to the baseline (every metric; 0 extras). The agent changed **0/32** cases: it answered "none" for every ambiguous set (no candidate has grounding in the data), and every category it submitted equalled the hint. 0 rejections, 0 retries, all submitted.
+  - Averages: 1.53 turns, 2.59 tool calls, about 6.3K input (mostly cache reads) and 365 output tokens per case.
+  - Cost: **$0.0098 per case, $0.31 total, about $5.00 projected for 508 deletion cases.**
+- **Flaw found:** the brief listed every hint-categorised resource (accounts, searches, audits) as "without source label", so the agent restated obvious categories. Only support_ and analytics_ resources (the prefixes that carry several categories) need its judgement.
+
+## 2026-10-25 — main.py CLI and run artefacts
+- **What:** `python code/main.py [--sample] [--no-llm] [--cases ...] [--out PATH] [--workers N]`.
+  - Defaults: the 518 requests → `output.csv` at the repo root; `--sample` → `.cache/sample_pred.csv`.
+  - With the agent on, a per-case log (turns, tool calls, tokens, changed vs baseline, choices, rejected items) goes to `<out>.agent_log.json`.
+  - Each case computes the deterministic baseline first, then the agent result, so "changed" is measured on every run.
+- **Why:** One entry point for the baseline, the agent run and the final output. Sample predictions stay out of the repo root so they are never mistaken for the submission.
+- **Rejected:** Separate scripts per mode (duplicated pipeline wiring).

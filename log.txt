@@ -345,3 +345,58 @@ repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-
 worktree=main
 parent_agent=none
 
+## [2026-10-25T01:06:32+05:00] Intent prompt cache off; validator + no-LLM baseline; agent built and run on samples
+
+User Prompt (verbatim, secrets redacted):
+Excellent find on reported_status matching the account row result. Before building the agent:
+1. Turn off prompt caching for the single-shot intent calls. Keep the disk cache. Note the change in DECISIONS.md.
+2. Build validator.py first, before the agent, so it can be tested on its own. Run the 32 samples with --no-llm using only deterministic links and report the score.py results. This is our baseline.
+3. Then build tools.py and agent.py from the approved design:
+   - Pre-fetch resolve_identity, search_evidence and the candidate sets in code, and put them in the first message.
+   - For an ambiguous candidate set, the agent may choose a resource only if it cites grounding evidence linking that resource to the subject (user_id, name, phone, email or hash in a record or transcription, at or before audit_at, or ownership-only after it). Otherwise it must answer "none". The validator rejects any choice without valid grounding and returns it as a tool error, up to 2 retries.
+   - Iteration cap 6 turns. Log per case: turns used, tool calls, tokens, whether the result differed from the deterministic baseline.
+4. Run the 32 samples with the agent on every deletion case. Report:
+   - score.py results next to the --no-llm baseline
+   - extras (must stay zero)
+   - how many cases the agent changed versus the baseline, and whether each change was right or wrong
+   - average turns, tokens and cost per case, and the projected cost for the 508 deletion cases
+   - what the agent did on case_28 and case_29
+Based on the results, propose whether unambiguous cases should skip the agent. I will decide.
+
+Agent Response Summary:
+Turned off prompt caching for intent calls (intent still 38/38) and added an offline mode. Built validator.py and main.py; the --no-llm baseline found and fixed one real bug (backup deletion_block state in case_17) and reached status 100%, step P 100% / R 93.78% / F1 96.79%, sequence 65.62%, 0 extras. Built tools.py and agent.py as specified and ran all 32 samples: identical scores, 0 changes versus the baseline, "none" on every ambiguous set (including case_28/case_29), $0.0098 per case, about $5.00 projected for 508. On the 518, 156 deletion cases have nothing for the agent to decide; a proposal to skip them is given to the user.
+
+Actions:
+* Edited code/llm.py (prompt_cache, OFFLINE), code/intent.py, code/evidence.py (hints, PDF collection, per-system coverage, deletion_block)
+* Created code/validator.py, code/main.py, code/tools.py, code/agent.py; added AGENT_SYSTEM to prompts.py
+* Ran: intent eval (38/38), 518 intents, main.py --sample --no-llm, main.py --sample (agent), score.py
+* Appended docs/DECISIONS.md (3 entries)
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T01:08:28+05:00] CHECKPOINT: phase 4 state, decisions, memory
+
+User Prompt (verbatim, secrets redacted):
+CHECKPOINT. Update docs/PROJECT_STATE.md for the phase we just finished: what is done, the latest sample score if it changed, open questions, and the exact next step. Append new decisions to docs/DECISIONS.md. Save only durable lessons to auto memory. Show me the diff of PROJECT_STATE.md.
+
+Agent Response Summary:
+Rewrote docs/PROJECT_STATE.md (53 lines) for the finished phase 4 (validator, deterministic baseline, tools, agent): the first scored sample results (status 100%, steps P 100% / R 93.78% / F1 96.79%, sequence 65.62%, 0 extras; agent identical), the agent cost ($0.0098 per case, about $5 for 508), open questions led by the agent-scope decision, and ordered next steps. Appended the main.py CLI and run-artefact decision. Saved one durable lesson: score a deterministic baseline first and measure the agent as a per-case delta.
+
+Actions:
+* Rewrote docs/PROJECT_STATE.md; appended docs/DECISIONS.md
+* Wrote memory deterministic-baseline-first.md; updated MEMORY.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+

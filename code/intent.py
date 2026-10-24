@@ -17,7 +17,8 @@ def classify_intent(case_id: str, request_text: str, thinking: str = INTENT_THIN
                     effort: str = INTENT_EFFORT) -> dict[str, Any]:
     response = call_claude(purpose="intent", case_id=case_id, model=INTENT_MODEL, max_tokens=2000,
                            system=INTENT_SYSTEM, messages=[{"role": "user", "content": request_text}],
-                           thinking={"type": thinking}, effort=effort, output_format=INTENT_SCHEMA)
+                           thinking={"type": thinking}, effort=effort, output_format=INTENT_SCHEMA,
+                           prompt_cache=False)
     text = next(b["text"] for b in response["content"] if b["type"] == "text")
     result = json.loads(text)
     # The decision is the intent label; authorizes_deletion must agree with it.

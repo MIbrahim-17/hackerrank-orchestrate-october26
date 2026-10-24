@@ -23,6 +23,7 @@ from typing import Any
 from config import CLAUDE_EFFORT, CLAUDE_MODEL, GEMINI_MODEL, LLM_CACHE_DIR
 
 LEDGER: list[dict[str, Any]] = []
+OFFLINE = False  # True: serve only from the disk cache and raise on a miss (used by --no-llm)
 _LOCK = threading.Lock()
 _clients: dict[str, Any] = {}
 
@@ -71,24 +72,30 @@ def _client(provider: str) -> Any:
 def call_claude(*, purpose: str, case_id: str, system: list[dict] | str, messages: list[dict],
                 tools: list[dict] | None = None, max_tokens: int = 16000, effort: str = CLAUDE_EFFORT,
                 model: str = CLAUDE_MODEL, thinking: dict | None = None,
-                output_format: dict | None = None) -> dict[str, Any]:
+                output_format: dict | None = None, prompt_cache: bool = True) -> dict[str, Any]:
     """One Messages API turn. Returns the response as a plain dict (content blocks can be appended to messages as-is).
 
     `output_format` is a JSON schema for structured output (the reply's text block is then valid JSON).
+    `prompt_cache=False` drops the API prompt-cache marker (single-shot calls never reuse a prefix); the disk cache
+    is unaffected.
     """
     output_config: dict[str, Any] = {"effort": effort}
     if output_format:
         output_config["format"] = {"type": "json_schema", "schema": output_format}
     request: dict[str, Any] = {
         "model": model, "max_tokens": max_tokens, "system": system, "messages": messages,
-        "output_config": output_config, "cache_control": {"type": "ephemeral"},
+        "output_config": output_config,
     }
+    if prompt_cache:
+        request["cache_control"] = {"type": "ephemeral"}
     if tools:
         request["tools"] = tools
     if thinking:
         request["thinking"] = thinking
     path = _cache_file("anthropic", request)
     cached = _load(path)
+    if cached is None and OFFLINE:
+        raise RuntimeError(f"offline mode: no cached Claude response for {purpose} {case_id}")
     if cached is None:
         response = _client("anthropic").messages.create(**request)  # one fixed model, no refusal fallback
         u = response.usage
@@ -114,6 +121,8 @@ def call_gemini(*, purpose: str, case_id: str, system: str, parts: list[str | Pa
     request = {"model": model, "system": system, "parts": keyed_parts, "schema": schema, "thinking": thinking_level}
     path = _cache_file("google", request)
     cached = _load(path)
+    if cached is None and OFFLINE:
+        raise RuntimeError(f"offline mode: no cached Gemini response for {purpose} {case_id}")
     if cached is None:
         from google.genai import types
         contents = [p if isinstance(p, str) else types.Part.from_bytes(data=Path(p).read_bytes(), mime_type="image/png")
