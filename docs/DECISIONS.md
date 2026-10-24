@@ -31,3 +31,8 @@ Append-only. Each entry: what, why, alternatives rejected.
 - **What:** Keep 1:1 finding→remediation as the default, but key findings by (resource, violation) and log a warning on compound cases.
 - **Why:** A full-dataset check found 0 resources with more than one category label, but unlabelled sources (raw logs, PNGs) can't be checked that way.
 - **Rejected:** Hard-asserting 1:1 (silently drops a second violation); building multi-action support now (YAGNI).
+
+## 2026-10-24 — Local scorer metric definitions (code/evaluation/score.py)
+- **What:** Status accuracy per gold case. Step exact match is a multiset of whole step objects (step_no ignored) → precision/recall/F1. Per-field accuracy is positional (a missing or extra step is wrong on every field). Sequence accuracy means the whole array is identical. Missing cases score zero; invalid JSON becomes a sentinel step that never matches.
+- **Why:** The multiset metric separates "found the right steps" from "ordered them right"; the positional field metric and sequence accuracy catch ordering errors. An order-only error (two steps swapped) leaves step F1 unchanged but drops field and sequence accuracy, which tells us which kind of bug we have.
+- **Rejected:** Aligning steps by (system_id, resource_id) before field scoring (hides ordering errors and is ambiguous when one resource has several steps); counting step_no as a field (it is derived from position, so it would double-count order errors). The hidden grader's exact formula is unknown, so these are proxies.

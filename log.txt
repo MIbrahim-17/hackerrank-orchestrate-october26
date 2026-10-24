@@ -128,3 +128,30 @@ repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-
 worktree=main
 parent_agent=none
 
+## [2026-10-24T23:49:02+05:00] Build code/evaluation/score.py and test it
+
+User Prompt (verbatim, secrets redacted):
+Build code/evaluation/score.py. It compares a predicted CSV with dataset/sample_output.csv and reports:
+- case-level deletion_status accuracy
+- step-level exact match (whole step object)
+- per-field accuracy for phase, system_id, resource_id, operation, state, evidence_id
+- sequence accuracy (exact array order)
+- a per-case diff for mismatches
+Parse steps_json as JSON so key order and whitespace are ignored. Make it importable. Test it by scoring sample_output.csv against itself (must be 100%) and against a copy with 3 deliberate errors.
+
+Agent Response Summary:
+Wrote a stdlib-only, importable scorer (load/score/score_files/format_report, a Report dataclass, CLI with --gold/--no-diff). Step match is a step_no-agnostic multiset (P/R/F1), field accuracy is positional, and sequence accuracy is exact array equality. Self-score and a key-shuffled/whitespace variant both give 100%. A 3-error copy (status flip, swapped steps, wrong evidence_id) gives exactly the expected numbers, and missing, invalid-JSON and extra cases are handled.
+
+Actions:
+* Created code/evaluation/score.py
+* Test fixtures in session scratchpad (pred_reformatted.csv, pred_3errors.csv, pred_edge.csv)
+* Appended docs/DECISIONS.md entry
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
