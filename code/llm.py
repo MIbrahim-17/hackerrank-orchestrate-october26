@@ -20,12 +20,51 @@ import threading
 from pathlib import Path
 from typing import Any
 
-from config import CLAUDE_EFFORT, CLAUDE_MODEL, GEMINI_MODEL, LLM_CACHE_DIR
+from config import CLAUDE_EFFORT, CLAUDE_MODEL, GEMINI_MODEL, LLM_CACHE_DIR, MAX_SPEND_USD, PRICES
 
 LEDGER: list[dict[str, Any]] = []
+_budget = {"spent": None, "reserved": 0.0}  # spent: priced total of every billed call (one disk-cache file each)
 OFFLINE = False  # True: serve only from the disk cache and raise on a miss (used by --no-llm)
 _LOCK = threading.Lock()
 _clients: dict[str, Any] = {}
+
+
+class BudgetExceeded(RuntimeError):
+    """Raised instead of making a live call that could push total spend over MAX_SPEND_USD."""
+
+
+def usage_cost(usage: dict[str, Any]) -> float:
+    p = PRICES[usage["model"]]
+    return (usage["input_tokens"] * p["input"] + usage["output_tokens"] * p["output"]
+            + usage["cache_read_tokens"] * p["cache_read"] + usage["cache_write_tokens"] * (p["cache_write"] or 0)) / 1e6
+
+
+def spent_so_far() -> float:
+    """Priced total of every billed call. Each live call writes exactly one cache file, so the cache is the ledger."""
+    with _LOCK:
+        if _budget["spent"] is None:
+            _budget["spent"] = sum(usage_cost(json.loads(f.read_text(encoding="utf-8"))["usage"])
+                                   for f in LLM_CACHE_DIR.glob("*.json")) if LLM_CACHE_DIR.exists() else 0.0
+        return _budget["spent"]
+
+
+def _reserve(model: str, request: dict[str, Any], max_output: int) -> float:
+    """Conservative pre-call estimate (all input at full price, a capped output) checked against the budget."""
+    p = PRICES[model]
+    estimate = (len(json.dumps(request, default=str)) / 3 * p["input"] + min(max_output, 4000) * p["output"]) / 1e6
+    spent = spent_so_far()
+    with _LOCK:
+        if spent + _budget["reserved"] + estimate > MAX_SPEND_USD:
+            raise BudgetExceeded(f"spent ${spent:.4f} + in-flight ${_budget['reserved']:.4f} + next call "
+                                 f"~${estimate:.4f} would exceed MAX_SPEND_USD ${MAX_SPEND_USD:.2f}")
+        _budget["reserved"] += estimate
+    return estimate
+
+
+def _settle(estimate: float, usage: dict[str, Any]) -> None:
+    with _LOCK:
+        _budget["reserved"] -= estimate
+        _budget["spent"] += usage_cost(usage)
 
 
 def _cache_file(provider: str, request: dict[str, Any]) -> Path:
@@ -97,7 +136,13 @@ def call_claude(*, purpose: str, case_id: str, system: list[dict] | str, message
     if cached is None and OFFLINE:
         raise RuntimeError(f"offline mode: no cached Claude response for {purpose} {case_id}")
     if cached is None:
-        response = _client("anthropic").messages.create(**request)  # one fixed model, no refusal fallback
+        estimate = _reserve(model, request, max_tokens)
+        try:
+            response = _client("anthropic").messages.create(**request)  # one fixed model, no refusal fallback
+        except Exception:
+            with _LOCK:
+                _budget["reserved"] -= estimate
+            raise
         u = response.usage
         cached = {"response": response.to_dict(), "usage": {
             "model": response.model,
@@ -107,6 +152,7 @@ def call_claude(*, purpose: str, case_id: str, system: list[dict] | str, message
             "output_tokens": u.output_tokens or 0,
         }}
         _save(path, cached)
+        _settle(estimate, cached["usage"])
         _record("anthropic", purpose, case_id, cached["usage"], from_disk=False)
     else:
         _record("anthropic", purpose, case_id, cached["usage"], from_disk=True)
@@ -125,6 +171,7 @@ def call_gemini(*, purpose: str, case_id: str, system: str, parts: list[str | Pa
         raise RuntimeError(f"offline mode: no cached Gemini response for {purpose} {case_id}")
     if cached is None:
         from google.genai import types
+        estimate = _reserve(model, request, 4000)
         contents = [p if isinstance(p, str) else types.Part.from_bytes(data=Path(p).read_bytes(), mime_type="image/png")
                     for p in parts]
         response = _client("google").models.generate_content(
@@ -146,6 +193,7 @@ def call_gemini(*, purpose: str, case_id: str, system: str, parts: list[str | Pa
             "output_tokens": (u.candidates_token_count or 0) + (u.thoughts_token_count or 0),
         }}
         _save(path, cached)
+        _settle(estimate, cached["usage"])
         _record("google", purpose, case_id, cached["usage"], from_disk=False)
     else:
         _record("google", purpose, case_id, cached["usage"], from_disk=True)

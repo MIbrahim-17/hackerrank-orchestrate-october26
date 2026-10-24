@@ -21,6 +21,16 @@ from validator import category_of, deterministic_owned, state_of, validate_case
 
 MAX_TURNS = 6
 MAX_RETRIES = 2
+JUDGED_PREFIXES = ("support", "analytics")  # prefixes that carry several categories; others are fixed by prefix
+
+
+def needs_agent(r: Request, index: EvidenceIndex, links: dict[str, ActivityLink]) -> bool:
+    """Route to the agent only when something is undecided: an ambiguous ownership set, or a support_/analytics_
+    resource whose category no source labels. Everything else is fully decided by the validator (DECISIONS 2026-10-25)."""
+    if any(link.status == "ambiguous" for link in links.values()):
+        return True
+    return any(rid.split("_", 1)[0] in JUDGED_PREFIXES and not any(o.record_type for o in index.by_resource.get(rid, []))
+               for rid in deterministic_owned(index, links, r))
 
 
 def case_brief(r: Request, index: EvidenceIndex, links: dict[str, ActivityLink]) -> tuple[str, list[str]]:
@@ -36,7 +46,7 @@ def case_brief(r: Request, index: EvidenceIndex, links: dict[str, ActivityLink])
         linked.append({"resource_id": rid, "system_id": system_id, "ownership": o.how, "via": o.grounding,
                        "category": category_of(index, rid), "category_source": "label" if labeled else "hint",
                        "state": st.value, "state_evidence": st.evidence_id})
-        if not labeled:
+        if not labeled and rid.split("_", 1)[0] in JUDGED_PREFIXES:
             unlabeled.append(rid)
     ambiguous = []
     for kind, link in links.items():
@@ -50,7 +60,7 @@ def case_brief(r: Request, index: EvidenceIndex, links: dict[str, ActivityLink])
                  "reported_status (a claim)": r.reported_status, "reported_at": r.reported_at},
         "subject": subject.to_dict(),
         "linked_resources": linked,
-        "resources_without_source_label": unlabeled,
+        "category_decisions_needed (no source label)": unlabeled,
         "ambiguous_ownership_sets": ambiguous,
     }
     text = ("Case brief (pre-fetched, deterministic):\n" + json.dumps(brief, ensure_ascii=False, default=str) +

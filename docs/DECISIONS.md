@@ -217,3 +217,37 @@ Append-only. Each entry: what, why, alternatives rejected.
   - Each case computes the deterministic baseline first, then the agent result, so "changed" is measured on every run.
 - **Why:** One entry point for the baseline, the agent run and the final output. Sample predictions stay out of the repo root so they are never mistaken for the submission.
 - **Rejected:** Separate scripts per mode (duplicated pipeline wiring).
+
+## 2026-10-25 — Agent routing: option A (user decision)
+- **What:** The agent runs only on deletion cases that have an ambiguous ownership set, or an owned support_/analytics_ resource with no source label (`agent.needs_agent`). On the 518 that is 352 cases. The other 156 deletion cases and the 10 non-deletion cases go through the validator alone. The brief now offers only support_ and analytics_ resources without a source label for category judgement.
+- **Measured reason:** on the 32 samples the agent changed 0 cases versus the --no-llm baseline, and every category it gave equalled the hint. On cases with nothing undecided it has no input that can change the answer.
+- **Rejected:** B, no agent (no model judgement where categories are genuinely open); C, all 508 (about $1.5 more for no measured gain).
+
+## 2026-10-25 — Sequence mismatches on the samples are missing resources only
+- **Check:** for all 11 sequence mismatches, removing the gold steps of resources the prediction lacks leaves arrays identical to the prediction (content, order, state, evidence). The missing resources are the 8 ambiguous ones (case_03, 21, 23, 25, 26, 27, 28 ×2, 29) and the 3 unreachable ones. No ordering fix is needed.
+
+## 2026-10-25 — Hard budget guard (MAX_SPEND_USD, default 4.50)
+- **What:** Before every live call, llm.py checks spent + in-flight reservations + a conservative estimate against MAX_SPEND_USD. "Spent" is the priced total of every disk-cache file, since each billed call writes exactly one. The estimate is input ≈ request chars / 3 at the full input price, plus min(max_tokens, 4000) output tokens. On excess it raises `BudgetExceeded` without calling; main.py falls back to the deterministic result for that case and counts and reports each fallback. Disk-cache hits never touch the budget. Tested: refusal at a $0.10 cap with a cache hit still served; also a unit test.
+- **Spend at the time of adding it (from the cache):** Haiku $0.1030 (923 calls), Sonnet $0.3147 (49), Flash $0.0465 (20, free-tier key, so priced not billed), total $0.4643.
+- **Rejected:** An in-memory ledger only (it forgets past runs); post-hoc stopping (would overshoot).
+
+## 2026-10-25 — Freeze of request-shaping code
+- **What:** prompts.py, tools.py and agent.py are frozen; code/tests/test_llm_guard_and_freeze.py pins their SHA-256. Any change alters the requests sent to the models, so every affected case misses the disk cache and is billed again.
+- **Also request-shaping (not hash-pinned):** the agent brief and validator messages use evidence.py, activity_links.py, identity.py and validator functions (`deterministic_owned`, `category_of`, `state_of`, `grounding_error`, the error text of `validate_case`). Changing those can also re-bill. After the full run, only validator.py's policy and step-building code (`treatment_for`, `plan`, `build_steps`) can change at no cost.
+
+## 2026-10-25 — Pilot: 40 of the 352 routed eval cases (every 9th by case number; 28 ambiguous, 12 category-only)
+- **Result:** $0.4705 total, **$0.0118 per case**; 2.02 turns on average (max 3), 3.3 tool calls; 0 retries, 0 rejections, 40/40 submitted. About 5.5K cache-read, 2.8K cache-write and 356 output tokens per case.
+- **Choices:** all 37 ambiguous sets answered "none" (14 account, 23 analytics). With the samples that makes 46/46 "none".
+- **Changed vs baseline: 1/40**, case_431. support_3615 is SUPPORT_ATTACHMENT in the baseline and SUPPORT_MESSAGE from the agent. It is seen as `ticket_attachments` (file_name delivery_confirmation_26.pdf, uploaded_by the subject) in evidence_40, captured 03-22 after the 03-20 audit_at, and as a generic `support_platform/tickets` row in evidence_68 (eligible). Uncertain: in the samples the tickets view always sits next to support_conversations, never next to ticket_attachments. Raised to the user. Gap: `category_of` uses evidence of any time, while the ownership-only decision allows post-audit evidence for ownership only.
+- **Budget projection:** spend after the pilot is $0.9347. The remaining 312 routed cases at $0.0118 ≈ $3.68, about $4.62 in total, which is over the $4.50 cap, so roughly 10 cases would fall back. Options raised to the user.
+
+## 2026-10-25 — Output contract validation built into main.py
+- **What:** After writing the CSV, `validate_output()` checks:
+  - the row count equals the requests, the header is exact, the case_id set matches, there are no duplicates, and rows are sorted by numeric case_id;
+  - each steps_json is a JSON array with step_no consecutive from 1, exactly the 7 step keys, and only (phase, operation, state) triples from the contract table;
+  - NOT_APPLICABLE rows have [], other statuses have steps, and COMPLETE rows have only VERIFICATION steps;
+  - every evidence_id is a known file_id, activity_id or audit_id whose time is ≤ the case's audit_at.
+  Problems are printed, and the exit code is 1 if there are any.
+- **Why:** The grader parses the file strictly; a broken row costs more than any model improvement.
+- **Check:** it passes on the --no-llm sample output and on the gold dataset/sample_output.csv, so it agrees with the official answers.
+- **Rejected:** A separate validation script (easy to forget to run).

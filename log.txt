@@ -400,3 +400,54 @@ repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-
 worktree=main
 parent_agent=none
 
+## [2026-10-25T01:14:19+05:00] Option A routing, spend report, guard, freeze, output validation, 40-case pilot
+
+User Prompt (verbatim, secrets redacted):
+Decision: option A. Run the agent only on the 352 cases with an ambiguous set or an unlabelled support or analytics resource. The other 156 go through the validator alone. Record the routing rule and the measured reason in DECISIONS.md.
+Budget constraint: my total API budget is 5 USD, and part of it is already spent. Read the ledger and tell me the exact spend so far, per model.
+1. Fix the brief so only support_ and analytics_ resources are sent for category judgement.
+2. Confirm that every one of the 11 sequence mismatches on the samples comes only from missing resources. If any comes from ordering, fix that first.
+3. Add a hard budget guard to llm.py: before every live call, check the ledger total. If it would exceed MAX_SPEND_USD (env var, default 4.50 total including past spend), make no call and fall back to the deterministic result for that case. Count and report every fallback. Disk-cache hits are always allowed.
+4. Freeze prompts.py and the tool output formats now. Tell me that any later change to them re-bills cases, so after the full run only validator.py may change.
+5. Pilot: run the agent on 40 of the 352 cases. Report the real cost per case, turns, retries, and how many cases changed versus the --no-llm baseline. Then stop and wait for my go-ahead.
+6. After my go-ahead: run the full pipeline on all 518 cases and write output.csv at the repo root, with the output validation built into main.py: 518 rows, correct header, numeric case_id sort, no duplicates, valid JSON arrays, consecutive step_no, allowed phase/operation/state combinations only, NOT_APPLICABLE rows with [], no evidence_id captured after audit_at.
+7. Report: status distribution, total cost and tokens per model, budget fallbacks, and how many of the 352 the agent changed versus the baseline, split by type of change.
+8. For up to 5 changed cases, show the evidence trail and the agent's grounding so I can verify them by hand. Include one non-English request if any changed.
+
+Agent Response Summary:
+Spend so far from the disk cache: Haiku $0.1030, Sonnet $0.3147, Flash $0.0465 (free tier), $0.4643 total. Confirmed all 11 sample sequence mismatches are missing resources only. Implemented the brief fix and needs_agent routing (352 cases), the MAX_SPEND_USD guard (tested), the freeze (SHA-256 test), and output validation in main.py (passes on the baseline and on the gold sample file). Pilot on 40 routed cases: $0.0118 per case, 2.02 turns, 0 retries, 1 case changed (case_431, uncertain because of a post-audit attachment record), 37/37 ambiguous sets "none". The projected full run (about $4.62) exceeds the $4.50 cap, so I stopped for the user's go-ahead (steps 6-8 not run).
+
+Actions:
+* Edited code/agent.py, prompts.py (brief scope, needs_agent), code/llm.py + config.py (budget guard), code/main.py (routing, fallbacks, validate_output)
+* Created code/tests/test_llm_guard_and_freeze.py (24 tests pass)
+* Ran the pilot: main.py --cases <40> --out .cache/pilot.csv
+* Appended docs/DECISIONS.md (5 entries)
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T01:16:56+05:00] CHECKPOINT: phase 5a state, decisions, memory
+
+User Prompt (verbatim, secrets redacted):
+CHECKPOINT. Update docs/PROJECT_STATE.md for the phase we just finished: what is done, the latest sample score if it changed, open questions, and the exact next step. Append new decisions to docs/DECISIONS.md. Save only durable lessons to auto memory. Show me the diff of PROJECT_STATE.md.
+
+Agent Response Summary:
+Rewrote docs/PROJECT_STATE.md (56 lines) for phase 5a (routing, budget guard, freeze, output validation, 40-case pilot). The sample score is unchanged; spend is $0.9347 (verified from the cache); the next step is blocked on two user decisions (budget routing, post-audit categories) before the full run. Kept the missing validator tests as a known issue. Appended the output-validation decision. Updated the existing quota memory into a general pilot-and-hard-cap lesson instead of adding a duplicate.
+
+Actions:
+* Rewrote docs/PROJECT_STATE.md; appended docs/DECISIONS.md
+* Updated memory check-api-quota-before-bulk.md and its MEMORY.md line
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+

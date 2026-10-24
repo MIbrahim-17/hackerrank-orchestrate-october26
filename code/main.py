@@ -21,10 +21,13 @@ from pathlib import Path
 import llm
 from activity_links import build_activity_links
 from config import CACHE_DIR, OUTPUT_CSV
-from data import load_requests
+from data import Request, load_activity, load_audit_log, load_manifest, load_requests
 from evidence import build_index
 from intent import classify_many
-from validator import CaseResult, validate_case
+from validator import OPERATIONS, CaseResult, validate_case
+
+STEP_KEYS = {"step_no", "phase", "system_id", "resource_id", "operation", "state", "evidence_id"}
+ALLOWED = {(phase, op, state) for phase, op, state in OPERATIONS}
 
 
 def write_csv(path: Path, results: list[CaseResult]) -> None:
@@ -34,6 +37,60 @@ def write_csv(path: Path, results: list[CaseResult]) -> None:
         w.writerow(["case_id", "deletion_status", "steps_json"])
         for res in sorted(results, key=lambda x: x.case_id):
             w.writerow([res.case_id, res.status, res.steps_json()])
+
+
+def validate_output(path: Path, requests: list[Request]) -> list[str]:
+    """Contract checks on the written CSV. Returns a list of problems (empty = valid)."""
+    problems: list[str] = []
+    evidence_time = {f.file_id: f.captured_at for f in load_manifest()}
+    evidence_time |= {a.activity_id: a.event_time for a in load_activity()}
+    evidence_time |= {a.audit_id: a.event_time for a in load_audit_log()}
+    audit_at = {r.case_id: r.audit_at for r in requests}
+    with open(path, newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        header = next(reader, [])
+        rows = list(reader)
+    if header != ["case_id", "deletion_status", "steps_json"]:
+        problems.append(f"bad header {header}")
+    ids = [row[0] for row in rows]
+    if len(rows) != len(requests):
+        problems.append(f"{len(rows)} rows, expected {len(requests)}")
+    if len(set(ids)) != len(ids):
+        problems.append("duplicate case_id")
+    if set(ids) != set(audit_at):
+        problems.append(f"case_id set differs from requests: {sorted(set(ids) ^ set(audit_at))[:5]}")
+    if ids != sorted(ids, key=lambda c: int(c.split("_")[1])):
+        problems.append("rows not sorted by numeric case_id")
+    for case_id, status, steps_json in rows:
+        try:
+            steps = json.loads(steps_json)
+        except json.JSONDecodeError:
+            problems.append(f"{case_id}: steps_json is not JSON")
+            continue
+        if not isinstance(steps, list):
+            problems.append(f"{case_id}: steps_json is not an array")
+            continue
+        if status not in ("COMPLETE", "INCOMPLETE", "NOT_APPLICABLE"):
+            problems.append(f"{case_id}: bad status {status}")
+        if status == "NOT_APPLICABLE" and steps:
+            problems.append(f"{case_id}: NOT_APPLICABLE with steps")
+        if status != "NOT_APPLICABLE" and not steps:
+            problems.append(f"{case_id}: {status} with no steps")
+        if [s.get("step_no") for s in steps] != list(range(1, len(steps) + 1)):
+            problems.append(f"{case_id}: step_no not consecutive from 1")
+        for s in steps:
+            if set(s) != STEP_KEYS:
+                problems.append(f"{case_id}: step keys {sorted(s)}")
+            if (s.get("phase"), s.get("operation"), s.get("state")) not in ALLOWED:
+                problems.append(f"{case_id}: illegal phase/operation/state {s.get('phase')}/{s.get('operation')}/{s.get('state')}")
+            ev = s.get("evidence_id", "")
+            if ev and ev not in evidence_time:
+                problems.append(f"{case_id}: unknown evidence_id {ev}")
+            elif ev and evidence_time[ev] > audit_at.get(case_id, ""):
+                problems.append(f"{case_id}: evidence {ev} captured after audit_at")
+            if status == "COMPLETE" and s.get("phase") != "VERIFICATION":
+                problems.append(f"{case_id}: COMPLETE with a {s.get('phase')} step")
+    return problems
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -60,14 +117,21 @@ def main(argv: list[str] | None = None) -> int:
     links = build_activity_links(index, everyone, non_deletion)
 
     agent_log: list[dict] = []
+    fallbacks: list[dict] = []
 
     def run(r):
         deletion = r.case_id not in non_deletion
         baseline = validate_case(r, index, links[r.case_id], deletion)
         if args.no_llm or not deletion:
             return baseline
-        from agent import investigate  # imported lazily: --no-llm never needs it
-        agent_result = investigate(r, index, links[r.case_id])
+        from agent import investigate, needs_agent  # imported lazily: --no-llm never needs it
+        if not needs_agent(r, index, links[r.case_id]):
+            return baseline
+        try:
+            agent_result = investigate(r, index, links[r.case_id])
+        except llm.BudgetExceeded as e:
+            fallbacks.append({"case_id": r.case_id, "reason": str(e)})
+            return baseline
         final = validate_case(r, index, links[r.case_id], deletion, agent_result)
         agent_log.append({"case_id": r.case_id, **agent_result["_stats"],
                           "changed": final.steps != baseline.steps or final.status != baseline.status,
@@ -79,6 +143,13 @@ def main(argv: list[str] | None = None) -> int:
         results = list(pool.map(run, targets))
     write_csv(out, results)
     print(f"wrote {len(results)} rows to {out}")
+    problems = validate_output(out, targets)
+    print(f"output validation: {'OK' if not problems else f'{len(problems)} problems'}")
+    for p in problems[:50]:
+        print(f"  {p}", file=sys.stderr)
+    print(f"budget fallbacks (deterministic result used): {len(fallbacks)}")
+    for fb in fallbacks:
+        print(f"  {fb['case_id']}: {fb['reason']}")
     if agent_log:
         log_path = out.with_suffix(".agent_log.json")
         log_path.write_text(json.dumps(sorted(agent_log, key=lambda x: x["case_id"]), indent=1, ensure_ascii=False))
@@ -86,7 +157,7 @@ def main(argv: list[str] | None = None) -> int:
     for res in results:
         if res.errors:
             print(f"  {res.case_id}: rejected agent items: {json.dumps(res.errors)}", file=sys.stderr)
-    return 0
+    return 1 if problems else 0
 
 
 if __name__ == "__main__":

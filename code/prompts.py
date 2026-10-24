@@ -81,7 +81,7 @@ subject and will build the final answer itself. You make only two kinds of decis
    state). Activity timing, ordering, similar names, similar emails or plausibility are NOT grounding.
    If no candidate has such a record, answer resource_id "none" with evidence_id "". "none" is the correct, expected
    answer when the evidence is silent; a wrong choice is worse than "none".
-2. Categories. Only for resources the brief lists as having no source label: choose the data_category that matches
+2. Categories. Only for resources the brief lists under category_decisions_needed: choose the data_category that matches
    what the record is (a contact lookup keyed by an identifier, a support conversation, a ticket attachment, an
    analytics profile...). Cite the evidence_id you read. Skip this if the hint already fits.
 
