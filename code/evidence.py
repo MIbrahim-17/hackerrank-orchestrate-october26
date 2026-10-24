@@ -143,7 +143,7 @@ class EvidenceIndex:
             if exclusion_reason(o.captured_at, o.observed_at, requested_at, audit_at) in (
                     "file captured after audit_at", "record timestamp after audit_at"):
                 owned[o.resource_id].append(o.source_id)
-        return {rid: sorted(set(src)) for rid, src in owned.items()}
+        return {rid: sorted(set(src)) for rid, src in sorted(owned.items())}
 
     def for_resource(self, resource_id: str, requested_at: str,
                      audit_at: str) -> tuple[list[Observation], list[tuple[Observation, str]]]:
@@ -296,6 +296,8 @@ def parse_log_line(line: str) -> tuple[str, dict[str, str]] | None:
     if not m:
         return None
     ts, rest = m.group(0), line[m.end():].strip()
+    if rest.startswith("| "):  # operations_stream: "ts | LEVEL | service | trace | event | k=v" (DECISIONS 2026-10-25)
+        rest = rest[2:]
     if rest.startswith("{"):
         d = {k: str(v) for k, v in json.loads(rest).items()}
     elif rest.startswith("<"):  # RFC5424: <pri>1 host service trace - - k="v" ...

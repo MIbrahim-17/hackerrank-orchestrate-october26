@@ -277,3 +277,39 @@ Append-only. Each entry: what, why, alternatives rejected.
 - **Defect 1, nondeterministic tie-break:** `category_of` and `explicit_label`-style code used `max(set(values), key=count)`. Python's per-process string-hash randomization makes the tie result vary between runs. It affects 1 owned resource (support_9309, case_119: one attachment hint, one message hint).
 - **Defect 2, pipe-format logs not parsed:** after the timestamp, operations_stream lines start with "| ", so the `LEVEL | service | trace | event | kv` branch never matched. Events were lost and lines were not grouped by trace, so lookup keys and resource IDs on different lines were never joined. An in-memory patch measured +25 owned resources in 16 eval cases (audit records, accounts, a legal hold), 0 lost, samples unchanged (99/111, 0 extras).
 - **Cost of fixing both:** 9 routed briefs change (case_213, 214, 216, 220, 514, 515, 520, 521, 522), about 9 × $0.0118 ≈ $0.11 re-billed, about $1.85 in total. The fixes touch evidence.py and `validator.category_of`, which feed the agent's first message, so they need the user's approval.
+
+## 2026-10-25 — Evidence that the agent adds value the samples could not show
+- **What:** On case_515 the agent read eligible evidence_48 (`attachment_pii_scan … file="delivery_confirmation_71.pdf"`) and classified support_4533 as SUPPORT_ATTACHMENT, where the deterministic baseline said SUPPORT_MESSAGE. Investigating why the baseline missed it exposed bug 2: the whole operations_stream log family was unparsed. Fixing it added 25 owned resources in 16 eval cases.
+- **Why it matters:** No sample case uses operations_stream evidence for a support resource, so no sample-based check could have found this. The agent's reading of raw evidence surfaced a deterministic gap that the validator now covers for every case.
+
+## 2026-10-25 — Bug 2 fixed: operations_stream (pipe-format) logs
+- **What:** In `parse_log_line`, text after the timestamp that starts with "| " has that prefix stripped, so the `LEVEL | service | trace | event | k=v` branch matches. Events are extracted and lines group by trace, so lookup keys and resource IDs on different lines are joined.
+- **Effect:** +25 owned resources in 16 eval cases, 0 removed; samples unchanged.
+
+## 2026-10-25 — Bug 1 fixed and category rule made explicit: specific beats generic; no hash-order dependence
+- **What:** `observation_label()` defines an explicit label (from evidence of any time) as:
+  - a `record_type` field;
+  - for support_ resources, any record naming an attachment file: "attachment" in the collection or event (ticket_attachments, attachment_scan, attachment_pii_scan, attachment PDFs), or `file=`/`file_name` with a document extension → SUPPORT_ATTACHMENT;
+  - a structural collection or table name that maps to a category.
+  Generic views (support_records, support_platform/tickets) map to nothing and are not labels.
+- **Conflicts:** they resolve by the fixed `LABEL_PRIORITY` list (more specific first: ACCOUNT_TOMBSTONE, LEGAL_HOLD_RECORD, SECURITY_AUDIT_LOG, BACKUP_ARCHIVE, DATA_FLOW, USER_EXPORT, SUPPORT_ATTACHMENT, SECONDARY_IDENTIFIER, MARKETING_PROFILE, EMAIL_DELIVERY_LOG, CACHE_ENTRY, SEARCH_INDEX_ENTRY, SUPPORT_MESSAGE, PRODUCT_TELEMETRY, ANALYTICS_PROFILE, USER_PROFILE) and are logged by main.py. Measured: **0 conflicts** across all resources.
+- **Determinism:**
+  - `max(set(...))` is replaced by `most_common()`, which uses frequency and then alphabetical order.
+  - The activity-propagation loop iterates sorted sets, and single-element sets are unpacked.
+  - `owned_after_audit` returns a sorted dict.
+  - All other set and dict uses were audited and found to be membership tests or sorted before use.
+  - Test: `code/tests/test_determinism.py` runs the full pipeline twice from cache (`--offline`, agent included) with PYTHONHASHSEED 1 and 2, and asserts the outputs are byte-identical to each other and to output.csv. It passes.
+- **Effect:**
+  - case_119 (support_9309) and case_71 (support_1370) resolve to SUPPORT_ATTACHMENT (attachment_scan logs) → DELETE.
+  - case_515 and case_431 stay SUPPORT_ATTACHMENT.
+  - 7 cases no longer route to the agent (77 routed); samples unchanged.
+- **Rejected:** majority vote over all hints (generic views would outvote specific records); letting the agent override an attachment record.
+
+## 2026-10-25 — Re-run after the fixes; freeze extended
+- **Projection vs actual:** 8 first-turn cache misses × $0.0118 ≈ $0.09 projected; actual $0.1334 (8 cases × about $0.017; the projection checked only first turns). Total spend $1.8604. 0 budget fallbacks.
+- **Diff vs the previous output.csv:**
+  - 18 cases changed; +25 resources, 0 removed;
+  - status flips: case_517 and case_519 COMPLETE → INCOMPLETE (newly linked data_flow/search and backup);
+  - treatment changes: case_71 and case_119 support records REDACT → DELETE.
+- **Final:** INCOMPLETE 354, COMPLETE 154, NOT_APPLICABLE 10. Validation OK. Agent: 77 routed, 0 changed vs baseline.
+- **Freeze extended:** test_llm_guard_and_freeze.py pins prompts.py, tools.py, agent.py, evidence.py, identity.py, activity_links.py, and the source of the validator functions that feed the brief (deterministic_owned, category_of, state_of, grounding_error, most_common). The rest of validator.py (labels, final_category, policy, step building) may change without re-billing.

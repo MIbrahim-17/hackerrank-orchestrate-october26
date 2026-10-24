@@ -501,3 +501,52 @@ repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-
 worktree=main
 parent_agent=none
 
+## [2026-10-25T01:29:08+05:00] Apply both fixes, specific-beats-generic labels, determinism test, re-run, re-freeze
+
+User Prompt (verbatim, secrets redacted):
+Apply both fixes and re-run. The agent's correct catch on case_515 exposing bug 2 goes in DECISIONS.md as evidence the agent adds value the samples could not show.
+1. Bug 2: fix the operations_stream log parsing as you described.
+2. Bug 1 and the category rule: replace the max(set(...)) tie-break with an explicit rule, specific beats generic. Records that name an attachment file (ticket_attachments, attachment_scan, attachment_pii_scan, file="...pdf") count as explicit category labels from any time, consistent with the principle that what a resource is may come from later evidence. Generic views such as support_records are not labels. If two explicit labels conflict, use a fixed documented priority and log the conflict. Nothing may depend on set or dict iteration order or on string hashing anywhere in the pipeline.
+3. Add a determinism test: run the full pipeline twice from cache with different PYTHONHASHSEED values and assert output.csv is byte-identical.
+4. Unfreeze the affected files, update the pinned hashes, and tell me the projected re-billing before running. If it is above $0.30, stop and ask.
+5. Re-run the full 518. Confirm samples are unchanged with 0 extras, validation passes, and report: the diff against the previous output.csv (cases and resources added, removed, changed), the final status distribution, total spend per model, and what case_71 and case_119 resolve to now and why.
+Then freeze again.
+
+Agent Response Summary:
+Fixed pipe-format log parsing and replaced set-based tie-breaks with explicit labels (record_type, attachment-file records, structural collections; LABEL_PRIORITY for conflicts, 0 conflicts measured), and audited set/dict order. Added --offline and a determinism test (byte-identical across PYTHONHASHSEED 1 and 2 and equal to output.csv). Projected re-billing $0.09 (8 misses), actual $0.133. The re-run changed 18 cases (+25 resources, 0 removed, 2 status flips; case_71 and case_119 now SUPPORT_ATTACHMENT → DELETE); final INCOMPLETE 354 / COMPLETE 154 / NOT_APPLICABLE 10; samples unchanged with 0 extras; validation OK; spend $1.8604. Re-froze with an extended hash set.
+
+Actions:
+* Edited code/evidence.py, code/validator.py, code/activity_links.py, code/main.py (--offline, label-conflict log)
+* Created code/tests/test_determinism.py; updated code/tests/test_llm_guard_and_freeze.py (extended freeze)
+* Ran main.py --sample --no-llm, main.py (full 518), all tests
+* Appended docs/DECISIONS.md (4 entries)
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T01:31:26+05:00] CHECKPOINT: phase 5c state, memory
+
+User Prompt (verbatim, secrets redacted):
+CHECKPOINT. Update docs/PROJECT_STATE.md for the phase we just finished: what is done, the latest sample score if it changed, open questions, and the exact next step. Append new decisions to docs/DECISIONS.md. Save only durable lessons to auto memory. Show me the diff of PROJECT_STATE.md.
+
+Agent Response Summary:
+Rewrote docs/PROJECT_STATE.md (52 lines) for phase 5c (both defects fixed, explicit label rule, determinism test, final 518 run, extended freeze). The sample score is unchanged; the final run is INCOMPLETE 354 / COMPLETE 154 / NOT_APPLICABLE 10; spend $1.8604; the next step is evaluation_report.md, then usage_report.md, README, validator tests and code.zip. Corrected the test count to 26 after running the suite. No new decisions to append (all recorded last turn). Folded the projection-underestimate lesson into the existing budget memory.
+
+Actions:
+* Rewrote docs/PROJECT_STATE.md
+* Updated memory check-api-quota-before-bulk.md
+* Ran the full test suite (26 OK)
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+

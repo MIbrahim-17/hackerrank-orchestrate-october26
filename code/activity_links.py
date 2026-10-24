@@ -116,13 +116,14 @@ def build_activity_links(index: EvidenceIndex, requests: list[Request],
             holders: dict[str, set[str]] = defaultdict(set)
             for case_id, acts in candidates.items():
                 if case_id not in assigned:
-                    for act in acts - set(assigned.values()):
+                    for act in sorted(acts - set(assigned.values())):
                         holders[act].add(case_id)
             for act, cases in sorted(holders.items()):
-                case_id = next(iter(cases))
-                if len(cases) == 1 and case_id not in assigned:
-                    assigned[case_id] = act
-                    changed = True
+                if len(cases) == 1:
+                    (case_id,) = cases
+                    if case_id not in assigned:
+                        assigned[case_id] = act
+                        changed = True
         taken = set(assigned.values())
         for case_id, acts in candidates.items():
             if case_id in assigned:

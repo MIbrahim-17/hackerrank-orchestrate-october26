@@ -105,28 +105,52 @@ def category_of(index: EvidenceIndex, resource_id: str, override: str | None = N
     observations = index.by_resource.get(resource_id, [])
     labels = [o.record_type for o in observations if o.record_type]
     if labels:
-        return max(set(labels), key=labels.count)
+        return most_common(labels)
     if override:
         return override
     hints = [o.category_hint for o in observations if o.category_hint]
     if hints:
-        return max(set(hints), key=hints.count)
+        return most_common(hints)
     prefix = resource_id.rsplit("_", 1)[0]
     return PREFIX_DEFAULT_CATEGORY.get(prefix, "USER_PROFILE")
 
 
 HINT_ONLY_SOURCES = ("log:", "screenshot:", "document:", "activity:")  # event names and titles: hints, not labels
+ATTACHMENT_FILE = re.compile(r"""\bfile(?:_name)?["']?\s*[:=]\s*["']?[\w.-]+\.(?:pdf|jpe?g|png|zip|docx?)\b""", re.IGNORECASE)
+# Fixed priority when explicit labels conflict: the more specific category wins (DECISIONS 2026-10-25).
+LABEL_PRIORITY = [
+    "ACCOUNT_TOMBSTONE", "LEGAL_HOLD_RECORD", "SECURITY_AUDIT_LOG", "BACKUP_ARCHIVE", "DATA_FLOW", "USER_EXPORT",
+    "SUPPORT_ATTACHMENT", "SECONDARY_IDENTIFIER", "MARKETING_PROFILE", "EMAIL_DELIVERY_LOG", "CACHE_ENTRY",
+    "SEARCH_INDEX_ENTRY", "SUPPORT_MESSAGE", "PRODUCT_TELEMETRY", "ANALYTICS_PROFILE", "USER_PROFILE",
+]
+LABEL_CONFLICTS: list[tuple[str, tuple[str, ...], str]] = []  # (resource_id, labels seen, label chosen)
+
+
+def most_common(values: list[str]) -> str:
+    """Most frequent value; ties go to the alphabetically first. Never depends on set order or string hashing."""
+    return min(sorted(set(values)), key=lambda v: (-values.count(v), v))
+
+
+def observation_label(o: Observation) -> str | None:
+    """The category a single record states explicitly, or None if it only hints.
+    Specific beats generic: a record naming an attachment file labels a support resource as an attachment."""
+    if o.record_type:
+        return o.record_type
+    if o.resource_id.startswith("support_") and ("attachment" in o.collection or ATTACHMENT_FILE.search(o.snippet)):
+        return "SUPPORT_ATTACHMENT"
+    if o.category_hint and not o.collection.startswith(HINT_ONLY_SOURCES):
+        return o.category_hint
+    return None
 
 
 def explicit_label(index: EvidenceIndex, resource_id: str) -> str | None:
-    """A category stated by a source, from evidence of any time (what a resource is does not change; DECISIONS
-    2026-10-25): a record_type field, else a structural collection or table name that maps to a category."""
-    observations = index.by_resource.get(resource_id, [])
-    labels = [o.record_type for o in observations if o.record_type]
-    if not labels:
-        labels = [o.category_hint for o in observations
-                  if o.category_hint and not o.collection.startswith(HINT_ONLY_SOURCES) and not o.record_type]
-    return max(sorted(set(labels)), key=labels.count) if labels else None
+    """Category stated by any source at any time (what a resource is does not change; DECISIONS 2026-10-25).
+    Conflicting labels resolve by LABEL_PRIORITY and are recorded in LABEL_CONFLICTS."""
+    labels = sorted({label for o in index.by_resource.get(resource_id, []) if (label := observation_label(o))},
+                    key=lambda c: (LABEL_PRIORITY.index(c) if c in LABEL_PRIORITY else len(LABEL_PRIORITY), c))
+    if len(labels) > 1:
+        LABEL_CONFLICTS.append((resource_id, tuple(labels), labels[0]))
+    return labels[0] if labels else None
 
 
 def final_category(index: EvidenceIndex, resource_id: str, override: str | None = None) -> str:

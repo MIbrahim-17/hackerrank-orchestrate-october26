@@ -104,11 +104,12 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Ghost Data deletion-audit pipeline")
     ap.add_argument("--sample", action="store_true", help="run the 32 sample requests")
     ap.add_argument("--no-llm", action="store_true", help="deterministic baseline: no agent, no API calls")
+    ap.add_argument("--offline", action="store_true", help="full pipeline from the disk cache only; a miss is an error")
     ap.add_argument("--cases", default="", help="comma-separated case_ids to run")
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--workers", type=int, default=8)
     args = ap.parse_args(argv)
-    llm.OFFLINE = args.no_llm
+    llm.OFFLINE = args.no_llm or args.offline
 
     samples, evals = load_requests("sample_deletion_requests.csv"), load_requests()
     targets = samples if args.sample else evals
@@ -161,6 +162,9 @@ def main(argv: list[str] | None = None) -> int:
         log_path = out.with_suffix(".agent_log.json")
         log_path.write_text(json.dumps(sorted(agent_log, key=lambda x: x["case_id"]), indent=1, ensure_ascii=False))
         print(f"agent log: {log_path}")
+    from validator import LABEL_CONFLICTS
+    for rid, labels, chosen in sorted(set(LABEL_CONFLICTS)):
+        print(f"  label conflict {rid}: {labels} -> {chosen}", file=sys.stderr)
     for res in results:
         if res.errors:
             print(f"  {res.case_id}: rejected agent items: {json.dumps(res.errors)}", file=sys.stderr)
