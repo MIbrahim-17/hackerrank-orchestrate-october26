@@ -44,3 +44,87 @@ repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-
 worktree=main
 parent_agent=none
 
+## [2026-10-24T23:27:37+05:00] Profile dataset CSVs, evidence formats, and PDF/PNG tooling
+
+User Prompt (verbatim, secrets redacted):
+Profile the data. Do not design anything yet.
+- Row counts and columns for every CSV in dataset/.
+- Print evidence_files.csv in full.
+- Counts of event_type x reported_result in system_activity.csv.
+- For each evidence folder, open one file of each kind and describe its structure: SQL table names and columns, JSON keys, log line format, TXT record format.
+- For the PNGs and PDFs, check which tools can read them here (pdftotext, pypdf, or Claude vision) and list the options.
+Save a short summary to docs/data_profile.md.
+
+Agent Response Summary:
+Profiled all 9 CSVs, printed the 94-row evidence manifest, and cross-tabbed 17 activity event types by reported_result. Loaded all 24 SQL snapshots into in-memory SQLite and described table schemas, JSON shapes, 7 log line syntaxes, and the TXT handover format. Found pdftotext works for all PDFs, no local OCR exists, and Claude vision is the only option for the 11 PNGs. No design decisions made; summary saved to docs/data_profile.md.
+
+Actions:
+* Python/sqlite3 profiling scripts over dataset/ (read-only)
+* pdftotext on 4 PDFs; viewed 2 PNGs
+* Created docs/data_profile.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-24T23:36:29+05:00] Trace sample steps to sources; test 5 hypotheses; write inferred rules
+
+User Prompt (verbatim, secrets redacted):
+For all 32 sample cases, trace each expected step in dataset/sample_output.csv back to the source data: which identifier matched, which evidence file or activity row, which data category, which deletion rule.
+
+Test these hypotheses and tell me which hold, with proof:
+1. Verification lists every relevant record in its final state, including the account even when it was never a finding.
+2. Policy is chosen by data_category, not system_id. Compare analytics_2034 with analytics_9914, and support_864 with support_4218.
+3. A case's findings usually cite one evidence_id: the latest evidence at or before audit_at that shows the record.
+4. Identity matching must be exact. case_28 has a decoy with a similar email.
+5. Identity chains can have several hops (user_10, user_35), and old email hashes appear in evidence.
+
+Write confirmed rules to docs/inferred_rules.md, each with its proving case_id. List ambiguous points separately. Do not write pipeline code yet.
+
+Agent Response Summary:
+Built a throwaway scratchpad tracer (identity chains, record-level evidence units, activity timing) and traced all 111 non-remediation sample resources. All five hypotheses hold, with nuances: eligibility uses the manifest captured_at, citations are per-resource (case_04 cites two files), and identity links must be scoped to [requested_at, audit_at] (0 extras across samples). Structural ordering and evidence_id rules were checked on all 32 cases with 0 violations. Ambiguities recorded: accounts and anonymized analytics often link only via activity timing, 3 resources are ungrounded, and some verify-only audit records appear only in post-audit files.
+
+Actions:
+* Scratch analysis scripts in session scratchpad (not committed)
+* Created docs/inferred_rules.md, docs/sample_trace.md
+* Updated docs/PROJECT_STATE.md
+* Viewed all 11 PNGs and 4 PDFs (pdftotext)
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-24T23:47:11+05:00] Revise rules D6, D3, A4, B2, B4 per user guidance
+
+User Prompt (verbatim, secrets redacted):
+For D6, D3, B2 and B4 do this:
+D6: Identity links only within [requested_at, audit_at] — Historical identifiers must be resolved from the full identity history, even when the change occurred before the deletion request. Otherwise, a request using an old email can fail to resolve to the correct user. Separate two concepts: Identity resolution: use historical identity changes to determine which person the request refers to. Resource eligibility: determine whether a record or event is relevant to the current request lifecycle, using the applicable timestamps and evidence rules. The lifecycle window may be appropriate for associating operational events with a deletion request, but it should not erase historical identity knowledge.
+D3: Evidence eligibility uses manifest captured_at — This is supported by the examples, but do not assume it applies identically to every evidence format. A snapshot can contain multiple records or event timestamps; an evidence file might also contain stale records. Keep captured_at as the initial eligibility gate where the manifest defines it, then interpret the file's contents and timestamps according to the evidence type. Do not let a file captured after audit_at prove the historical state at audit_at.
+A4: Exactly one remediation per finding — The mapping works for the provided samples, but it may fail when a resource has multiple independent policy violations, or when a single record requires more than one action. Keep the mapping as the default behavior. Before enforcing it universally, check whether the hidden cases contain compound treatments or whether each finding represents exactly one remediation unit.
+B4: INCOMPLETE verification scope — Instead, derive the verification set from the required final-state inventory: 1. The primary account must be verified absent. 2. Each resource targeted for remediation must have its matching verification. 3. Every other relevant resource must also be checked if the specification requires it to be in a compliant state. 4. Retained records must be verified present and compliant where supported by the policy and evidence.
+B2: A retained audit record is verified PRESENT when one exists — Separate the policy requirement from whether the record is discoverable. The audit record must remain available when required by policy, but you should not invent an evidence-backed presence claim if the only evidence comes from after audit_at.
+
+Agent Response Summary:
+Ran three checks before rewriting. All 306 identity changes predate their requests and 103/550 requests use a historical email, so identity resolution now uses the full history and only record association is windowed. Found two post-dated records inside eligible files (evidence_13, evidence_36) that would mislead eval case_135 and case_383, so D3 now has a file gate plus a per-record gate. No resource has more than one category label, so A4 stays 1:1 by default, keyed by (resource, violation). Rewrote B2 (policy vs discoverability) and B4 (verification from the final-state inventory).
+
+Actions:
+* Scratch checks (identity timing, per-format timestamps, compound category labels)
+* Edited docs/inferred_rules.md (A4, B2, B3, B4, D3, D6, verdict table, ambiguity 9)
+* Appended 4 entries to docs/DECISIONS.md; updated docs/PROJECT_STATE.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
