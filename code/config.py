@@ -11,7 +11,7 @@ load_dotenv(REPO_ROOT / ".env")
 
 DATASET_DIR = REPO_ROOT / "dataset"
 CACHE_DIR = REPO_ROOT / ".cache"
-LLM_CACHE_DIR = CACHE_DIR / "llm"
+LLM_CACHE_DIR = Path(__file__).resolve().parent / "cache" / "llm"  # shipped in code.zip so the run replays offline at $0
 OUTPUT_CSV = REPO_ROOT / "output.csv"
 
 CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-sonnet-5-5")

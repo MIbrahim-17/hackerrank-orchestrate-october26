@@ -19,10 +19,18 @@ def classify_intent(case_id: str, request_text: str, thinking: str = INTENT_THIN
                            system=INTENT_SYSTEM, messages=[{"role": "user", "content": request_text}],
                            thinking={"type": thinking}, effort=effort, output_format=INTENT_SCHEMA,
                            prompt_cache=False)
-    text = next(b["text"] for b in response["content"] if b["type"] == "text")
-    result = json.loads(text)
+    text = next((b["text"] for b in response["content"] if b["type"] == "text"), None)
+    try:
+        if response.get("stop_reason") not in ("end_turn", None) or text is None:
+            raise ValueError(f"stop_reason={response.get('stop_reason')}")
+        result = json.loads(text)
+        intent = result["intent"]
+    except (ValueError, KeyError, TypeError) as e:
+        # Refusal, truncation or bad JSON: audit it as a deletion (the conservative choice; NOT_APPLICABLE would
+        # drop every finding) and flag it so main.py reports it.
+        return {"intent": "UNPARSEABLE", "authorizes_deletion": True, "language": "", "reason": str(e), "fallback": True}
     # The decision is the intent label; authorizes_deletion must agree with it.
-    result["authorizes_deletion"] = result["intent"] == "DELETION"
+    result["authorizes_deletion"] = intent == "DELETION"
     return result
 
 

@@ -140,6 +140,9 @@ def main(argv: list[str] | None = None) -> int:
         except llm.BudgetExceeded as e:
             fallbacks.append({"case_id": r.case_id, "reason": str(e)})
             return baseline
+        except Exception as e:  # one failing case (API error, bad tool input...) must not abort the 518-case run
+            fallbacks.append({"case_id": r.case_id, "reason": f"agent error {type(e).__name__}: {e}"})
+            return baseline
         final = validate_case(r, index, links[r.case_id], deletion, agent_result)
         agent_log.append({"case_id": r.case_id, **agent_result["_stats"],
                           "changed": final.steps != baseline.steps or final.status != baseline.status,
@@ -155,7 +158,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"output validation: {'OK' if not problems else f'{len(problems)} problems'}")
     for p in problems[:50]:
         print(f"  {p}", file=sys.stderr)
-    print(f"budget fallbacks (deterministic result used): {len(fallbacks)}")
+    print(f"agent fallbacks (deterministic result used): {len(fallbacks)}")
+    unparsed = sorted(cid for cid, v in intents.items() if v.get("fallback"))
+    print(f"intent fallbacks (reply unparseable, treated as deletion): {len(unparsed)} {unparsed}")
     for fb in fallbacks:
         print(f"  {fb['case_id']}: {fb['reason']}")
     if agent_log:

@@ -341,3 +341,29 @@ Append-only. Each entry: what, why, alternatives rejected.
 - **Final run:** 721 calls (Haiku 550 intent, of which 398 have distinct texts; Sonnet 160 agent calls for 77 cases; Flash 11 transcriptions), 1,122,288 tokens, $0.9465, i.e. 2,167 tokens and $0.001827 per request. With identical intent requests counted once: $0.9301, $0.001796 per request.
 - **Billed development:** $1.9184 priced, of which $1.8719 was actually charged (Anthropic); Flash ($0.0465) ran on a free-tier key, so it was priced but not charged. The total was $1.8604 when output.csv was produced.
 - **Rejected:** reporting only the cache-hit-free bill (it would understate what the final output depends on); summing the in-process ledger of the original run (it is not persisted, and the run was split across a re-run).
+
+## 2026-10-25 — Submission packaging: shipped disk cache, secrets scan, clean-room replay
+- **Disk cache shipped:** `.cache/llm` was 5.1 MB, 1,263 files (one per billed call), each holding only `{response, usage}`: no requests, no keys, no auth headers. It was moved (not copied, so there is one ledger) to `code/cache/llm`. The only change is the path, `config.LLM_CACHE_DIR = code/cache/llm`. Run artefacts (sample predictions, agent logs) stay in `.cache/`. The spend guard reads the same $1.9184 from the new path, and all 26 tests pass.
+- **Secrets:**
+  - A search for the exact key values from `.env` (Anthropic and Google) found none in any of 1,482 working-tree files (outside .env/.venv/.git) or any of 519 objects in the full git history (52 commits).
+  - `.env` is not tracked, never appeared in history, and is ignored by `.gitignore:1`.
+  - A generic regex scan was not relied on: it missed the `.env` itself, and the Google key uses an `AQ.` prefix rather than `AIza`.
+- **code.zip:** built with the README command extended by `docs/DECISIONS.md docs/inferred_rules.md`, excluding __pycache__, .venv, venv, node_modules, .git and .DS_Store. 1.1 MB, 1,364 entries: README.md, code/ (including 1,263 cache files and 6 synthetic custom cases) and the two docs. No dataset/, .env, log.txt or nested archives.
+- **Clean-room test:** unzipped into a new folder next to a copy of dataset/, fresh `uv venv`, `uv pip install -r code/requirements.txt`, and `python code/main.py` with ANTHROPIC/GEMINI/GOOGLE keys unset and no .env.
+  - Exit 0, validation OK, 0 fallbacks.
+  - **output.csv byte-identical** to the repository's (same SHA-256).
+  - Cache file count unchanged (no live calls).
+  - `score.py --custom` also 6/6 PASS keyless.
+- **Rejected:** leaving the cache out (a fresh run would need both keys and about $1); copying instead of moving (two ledgers could diverge).
+
+## 2026-10-25 — Code-judge review: 5 weakest points, 3 fixed without touching frozen files
+- **Weights used:** agent architecture 30%, prompt and tool craft 30%, robustness 25%, engineering rigor 15%. Only implemented behaviour was scored.
+- **Fixed (no frozen file touched, no model request changed, output.csv byte-identical, sha d0197918…):**
+  1. `main.py`: any agent exception other than BudgetExceeded used to abort the whole run from `pool.map`. Now it falls back to the deterministic answer for that case and is counted ("agent fallbacks").
+  2. `intent.py`: the reply was parsed without checking `stop_reason`; a refusal or truncated JSON raised and aborted the run. Now it is a flagged fallback (`UNPARSEABLE`, treated as deletion, the conservative choice since NOT_APPLICABLE drops every finding), and main.py reports the count. Mock-tested on refusal, max_tokens, bad JSON and a normal reply.
+  5. (test half) `code/tests/test_validator.py`, 9 tests: the policy table, step order, numbering and citations, specific-beats-generic labels, case_17 restore risk, case_31 snapshot-absence citation, NOT_APPLICABLE, rejection of an ungrounded agent choice, and samples status 100% with precision 100%. The suite is now 35 tests, all passing, including determinism.
+- **Described, not fixed (frozen):**
+  3. `agent.py:78-110`: no `stop_reason` handling. `agent.py:27`: dead `needs_agent`, diverging from `main.route_to_agent`.
+  4. `tools.py:91`: `get_activity` substring ID matching. `validator.py:223` + `evidence.py:277`: name grounding limited to a 600-character snippet.
+  5. (policy half) `validator.py:178-187`: RETAIN ignores the rule conditions. 0 of 437 retained records in output.csv have a retention date before audit_at, and the rules do not define the expired case, so a fix would be a guess.
+  These are listed under the evaluation report's known limitations.

@@ -631,3 +631,79 @@ repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-
 worktree=main
 parent_agent=none
 
+## [2026-10-25T10:29:33+05:00] Submission prep: README, shipped cache, secrets scan, code.zip, clean-room test
+
+User Prompt (verbatim, secrets redacted):
+Prepare the submission. Do not change pipeline logic.
+1. README.md at the repo root. Describe only what the code actually does:
+   - setup: uv venv, uv pip install -r code/requirements.txt, copy .env.example to .env with ANTHROPIC_API_KEY and GEMINI_API_KEY (GOOGLE_API_KEY also accepted)
+   - run commands: full run, --sample, --no-llm, MAX_SPEND_USD, running the tests, score.py and score.py --custom
+   - a short architecture section with the data flow for one case: intent with Haiku, deterministic identity, evidence and activity linking, routing, the Sonnet agent only for unlabelled support and analytics resources, the validator that builds and orders steps_json
+   - which model does what and why, and where the prompts live (code/prompts.py)
+   - links to code/evaluation/evaluation_report.md, code/evaluation/usage_report.md, docs/DECISIONS.md and docs/inferred_rules.md
+2. Disk cache: report its size and whether it holds anything other than model requests and responses. If it is under 10 MB and contains no secrets, move or copy it to code/cache/ so the zip can replay the run offline at $0, and update the path. If it is larger, leave it out and say in the README that a fresh run needs both keys and costs about $1.
+3. Scan the working tree and the full git history for API keys or tokens. Confirm .env is not tracked and never was.
+4. Build code.zip with the README command extended to include docs/DECISIONS.md and docs/inferred_rules.md, excluding __pycache__, .venv, .git and .DS_Store. List its contents. It must not contain dataset/, .env, log.txt or any nested archive.
+5. Clean-room test: unzip code.zip into a new temp folder next to a copy of dataset/, create a fresh uv venv there, install requirements, and run the full pipeline with no API keys set. Report whether output.csv is byte-identical to ours. If it cannot run without keys, tell me exactly what fails.
+
+Agent Response Summary:
+The cache is 5.1 MB with only {response, usage} per file and no secrets; it was moved to code/cache/llm (path change in config.py only); tests pass. An exact-value search found no API key in 1,482 working-tree files or 519 history objects; .env was never tracked. Rewrote README.md (setup, run commands, budget guard, architecture and data flow, models and why, prompts location, links). Built code.zip (1.1 MB, 1,364 entries, nothing forbidden). The clean-room keyless run in a fresh venv produced a byte-identical output.csv with no live calls; custom cases 6/6 keyless.
+
+Actions:
+* Moved .cache/llm -> code/cache/llm; edited code/config.py (LLM_CACHE_DIR)
+* Rewrote README.md; built code.zip
+* Secrets scans (regex and exact values over the tree and git history)
+* Clean-room unzip + uv venv + install + keyless main.py and score.py --custom
+* Appended docs/DECISIONS.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T10:38:20+05:00] Code-judge review: 5 weakest points, 3 fixed, re-verified, code.zip rebuilt
+
+User Prompt (verbatim, secrets redacted):
+Review the codebase as a strict code judge would, using these weights: agent architecture 30%, prompt and tool craft 30%, robustness 25%, engineering rigor 15%. Only score what the code actually implements, not what the README says.
+List the 5 weakest points with file and line. Fix only those that are quick, low-risk, and do not touch the frozen files (anything that would re-bill cases). For any issue in a frozen file, describe it but do not fix it. After fixes, rerun the tests and the determinism check, confirm output.csv is unchanged, and rebuild code.zip.
+
+Agent Response Summary:
+Identified the 5 weakest points: (1) main.py agent exceptions abort the run, (2) intent.py unguarded parse/stop_reason, (3) agent.py no stop_reason handling plus a dead needs_agent, (4) tools.py substring activity matching and 600-character name-grounding window, (5) validator RETAIN ignores rule conditions and the validator was untested. Fixed 1 and 2 (per-case fallbacks with counts; mock-tested) and added 9 validator tests (35 total, all pass incl. determinism). Described 3, 4 and the policy half of 5 (frozen or undefined semantics; 0/437 records affected) in DECISIONS.md and the report's limitations. output.csv is byte-identical; code.zip was rebuilt; the keyless clean-room replay is still byte-identical.
+
+Actions:
+* Edited code/main.py (generic agent fallback, intent fallback count), code/intent.py (guarded parse)
+* Created code/tests/test_validator.py; updated test counts in README.md and evaluation_report.md; added limitations
+* Ran tests (35 OK), main.py --offline (cmp identical), clean-room keyless run
+* Appended docs/DECISIONS.md; rebuilt code.zip
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T10:49:05+05:00] CHECKPOINT: phase 6 complete, submission ready
+
+User Prompt (verbatim, secrets redacted):
+CHECKPOINT. Update docs/PROJECT_STATE.md for the phase we just finished: what is done, the latest sample score if it changed, open questions, and the exact next step. Append new decisions to docs/DECISIONS.md. Save only durable lessons to auto memory. Show me the diff of PROJECT_STATE.md.
+
+Agent Response Summary:
+Rewrote docs/PROJECT_STATE.md (53 lines): phase 6 is complete (README, shipped cache, secrets scan, code.zip, clean-room byte-identical replay, review fixes, 35 tests); the sample score is unchanged; there are no blocking open questions; the next step is the user submitting code.zip, output.csv and log.txt at the challenge URL. Restored the "reasoned, not sample-proven" open question that the rewrite had dropped. No new decisions to append (packaging and review already recorded). Saved one durable lesson: run a judge-style self-review and add per-item failure isolation before freezing request-shaping code.
+
+Actions:
+* Rewrote docs/PROJECT_STATE.md
+* Wrote memory harden-before-freeze.md; updated MEMORY.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+

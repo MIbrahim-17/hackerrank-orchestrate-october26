@@ -13,7 +13,7 @@ This report evaluates the deletion-audit pipeline in `code/`. Every number here 
 .venv/bin/python code/evaluation/score.py .cache/sample_full.csv
 .venv/bin/python code/evaluation/score.py --custom                             # 6 synthetic custom cases
 .venv/bin/python code/evaluation/intent_eval.py                                # intent: 32 samples + 6 sentences
-.venv/bin/python -m unittest discover -s code/tests                            # 26 tests incl. determinism
+.venv/bin/python -m unittest discover -s code/tests                            # 35 tests incl. determinism
 ```
 
 **Metric definitions (`score.py`):**
@@ -463,3 +463,9 @@ The agent's direct effect on the final output is zero. Its value so far is diagn
 - **Screenshot states:** screenshots without explicit flags (e.g. backup consoles) read as PRESENT. Restore risk is only detected from flags in logs, snapshots and inventories.
 - **Images:** the 11 PNGs were transcribed once by gemini-3.8-flash (free tier) and cached. Re-transcription needs a Gemini key; the cached transcriptions are used as is.
 - **Model output determinism:** model calls are deterministic only through the disk cache. A fresh, uncached run could produce different agent or intent answers, although every agent output is constrained by the validator.
+- **Known code weaknesses (left unfixed because the files are frozen: changing them would re-bill cached cases):**
+  - `agent.py` never checks `stop_reason`, so a `max_tokens` or refusal turn is not handled specially; the loop only nudges toward `submit_findings` until the 6-turn cap.
+  - `agent.needs_agent` is dead code with a different "unlabelled" definition from the router actually used (`main.route_to_agent`).
+  - `tools.get_activity` matches resource IDs by substring (`account_1` also returns `account_12` rows).
+  - Name-based grounding is checked only within the first 600 characters of a record (`evidence.py` snippet).
+  - `validator.plan` applies RETAIN without checking the rule conditions (retention period, active hold); measured impact on this data is 0 of 437 retained records.
