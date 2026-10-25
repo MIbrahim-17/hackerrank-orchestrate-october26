@@ -1,0 +1,31 @@
+{
+  "exported_at": "2026-07-10T12:00:00Z",
+  "origin": "custom_assurance_ledger",
+  "record_count": 3,
+  "records": [
+    {
+      "recorded_at": "2026-07-10T12:00:00Z",
+      "system": "account_service",
+      "resource_id": "account_90031",
+      "record_type": "USER_PROFILE",
+      "result": "NOT_FOUND",
+      "subject_reference": "casey.m@example.test"
+    },
+    {
+      "recorded_at": "2026-07-10T12:00:00Z",
+      "system": "security_service",
+      "resource_id": "audit_record_90032",
+      "record_type": "SECURITY_AUDIT_LOG",
+      "result": "FOUND",
+      "subject_reference": "user_9003"
+    },
+    {
+      "recorded_at": "2026-07-12T12:00:00Z",
+      "system": "account_service",
+      "resource_id": "account_90031",
+      "record_type": "USER_PROFILE",
+      "result": "FOUND",
+      "subject_reference": "casey.m@example.test"
+    }
+  ]
+}

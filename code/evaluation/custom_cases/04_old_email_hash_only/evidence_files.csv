@@ -1,0 +1,3 @@
+file_id,file_path,origin,captured_at
+evidence_9006,evidence/logs/custom_search_trace_9004.log,custom_observability_export,2026-08-10T10:00:00Z
+evidence_9007,evidence/records/custom_ledger_9007.json,custom_assurance_ledger,2026-08-10T10:00:00Z

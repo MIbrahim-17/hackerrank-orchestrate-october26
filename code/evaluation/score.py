@@ -2,6 +2,7 @@
 
 Usage:
     python code/evaluation/score.py PRED_CSV [--gold GOLD_CSV] [--no-diff]
+    python code/evaluation/score.py --custom     # run and score the synthetic cases in code/evaluation/custom_cases/
 
 Metrics:
 - status accuracy: deletion_status matches, per gold case.
@@ -16,13 +17,19 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import shutil
+import subprocess
 import sys
+import tempfile
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_GOLD = REPO_ROOT / "dataset" / "sample_output.csv"
+CUSTOM_DIR = Path(__file__).resolve().parent / "custom_cases"
+CUSTOM_TABLES = ["deletion_requests.csv", "user_identities.csv", "user_audit_log.csv", "system_activity.csv",
+                 "evidence_files.csv", "expected_output.csv"]
 FIELDS = ("phase", "system_id", "resource_id", "operation", "state", "evidence_id")
 
 Step = dict
@@ -156,12 +163,67 @@ def format_report(report: Report, show_diff: bool = True) -> str:
     return "\n".join(out)
 
 
+def _merge_csv(sources: list[Path], target: Path) -> None:
+    header, rows = None, []
+    for src in sources:
+        with open(src, newline="", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            header = next(reader)
+            rows += list(reader)
+    with open(target, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(header)
+        w.writerows(rows)
+
+
+def run_custom_cases() -> int:
+    """Build one synthetic dataset from custom_cases/*, run the unchanged pipeline on it, and score each case."""
+    cases = sorted(d for d in CUSTOM_DIR.iterdir() if d.is_dir())
+    with tempfile.TemporaryDirectory() as tmp:
+        data = Path(tmp) / "dataset"
+        (data / "evidence").mkdir(parents=True)
+        for table in CUSTOM_TABLES:
+            _merge_csv([c / table for c in cases], data / table)
+        for c in cases:
+            shutil.copytree(c / "evidence", data / "evidence", dirs_exist_ok=True)
+        shutil.copy(REPO_ROOT / "dataset" / "deletion_rules.csv", data / "deletion_rules.csv")  # policy, not personal data
+        (data / "sample_deletion_requests.csv").write_text(
+            "case_id,email,requested_at,reported_status,reported_at,audit_at,request_text\n", encoding="utf-8")
+        pred = Path(tmp) / "pred.csv"
+        code = (f"import sys; from pathlib import Path; sys.path.insert(0, {str(REPO_ROOT / 'code')!r}); "
+                f"import config; config.DATASET_DIR = Path({str(data)!r}); "
+                f"import main; sys.exit(main.main(['--out', {str(pred)!r}, '--workers', '4']))")
+        proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=REPO_ROOT)
+        print(proc.stdout.strip())
+        if proc.returncode != 0:
+            print(proc.stderr[-3000:], file=sys.stderr)
+            return 1
+        gold, predicted = load(data / "expected_output.csv"), load(pred)
+    names = {}
+    for c in cases:
+        with open(c / "deletion_requests.csv", newline="", encoding="utf-8") as f:
+            names[next(csv.DictReader(f))["case_id"]] = c.name
+    report = score(gold, predicted)
+    print(format_report(report, show_diff=True))
+    print("\nper case:")
+    for case_id in sorted(gold, key=lambda x: int(x.split("_")[1])):
+        ok = gold[case_id] == predicted.get(case_id)
+        print(f"  {'PASS' if ok else 'FAIL'} {case_id} {names[case_id]}: expected {gold[case_id][0]}, got {predicted.get(case_id, ('<missing>',))[0]}")
+        print(f"       steps: {json.dumps(predicted.get(case_id, ('', []))[1], ensure_ascii=False)}")
+    return 0 if all(gold[c] == predicted.get(c) for c in gold) else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("pred", type=Path)
+    ap.add_argument("pred", type=Path, nargs="?")
+    ap.add_argument("--custom", action="store_true", help="run and score the synthetic custom cases")
     ap.add_argument("--gold", type=Path, default=DEFAULT_GOLD)
     ap.add_argument("--no-diff", action="store_true", help="hide the per-case diff")
     args = ap.parse_args(argv)
+    if args.custom:
+        return run_custom_cases()
+    if args.pred is None:
+        ap.error("PRED_CSV is required unless --custom is given")
     print(format_report(score_files(args.pred, args.gold), show_diff=not args.no_diff))
     return 0
 

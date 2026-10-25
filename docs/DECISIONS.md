@@ -313,3 +313,31 @@ Append-only. Each entry: what, why, alternatives rejected.
   - treatment changes: case_71 and case_119 support records REDACT → DELETE.
 - **Final:** INCOMPLETE 354, COMPLETE 154, NOT_APPLICABLE 10. Validation OK. Agent: 77 routed, 0 changed vs baseline.
 - **Freeze extended:** test_llm_guard_and_freeze.py pins prompts.py, tools.py, agent.py, evidence.py, identity.py, activity_links.py, and the source of the validator functions that feed the brief (deterministic_owned, category_of, state_of, grounding_error, most_common). The rest of validator.py (labels, final_category, policy, step building) may change without re-billing.
+
+## 2026-10-25 — Custom evaluation cases and the evaluation report
+- **What:** Six synthetic end-to-end cases in `code/evaluation/custom_cases/` (fictional people and `example.test` emails; sha256 hashes computed; only deletion_rules.csv, which is policy, copied from the dataset):
+  1. a 3-hop email chain where the request uses the oldest email;
+  2. a sync recreating the account before audit_at;
+  3. post-audit evidence (record gate and file gate) ignored and uncited;
+  4. a record found only via an old email_hash in a two-line log trace;
+  5. a Spanish non-deletion request;
+  6. a French deletion with retained legal-hold and audit records.
+- **How they run:** `score.py --custom` merges them into a temporary dataset and runs the **unchanged** pipeline in a subprocess, with `config.DATASET_DIR` pointed there before the pipeline is imported. No pipeline code changed.
+- **Result:** 6/6 PASS (status, steps, sequence and every field 100%). Cost: 6 Haiku intent calls (about $0.0006).
+- **Full system on the samples (current routing):** byte-identical to the `--no-llm` baseline. 4 cases routed (case_10, 12, 18, 19), 0 changed, $0.057.
+- **Report:** `code/evaluation/evaluation_report.md` contains, all inline in markdown:
+  - baseline vs full-system metrics;
+  - the proof that all 11 sequence misses are missing resources;
+  - the 12 unrecovered resources by reason and the 108/111 ceiling;
+  - every custom case with input, expected, actual and result (generated from the case files and an actual run, so it cannot drift);
+  - intent tuning;
+  - failures and fixes with before/after numbers;
+  - the agent's measured contribution;
+  - limitations.
+- **Rejected:** hand-writing the custom-case section (risk of drift from what was tested); reusing dataset records (personal data).
+
+## 2026-10-25 — Usage report built from a replayed ledger
+- **What:** `code/evaluation/usage_ledger.py` replays the final run with `main.py --offline` (byte-identical to output.csv) and sums the ledger, giving every call the output depends on with its original token counts. It also sums every disk-cache file, since each billed call wrote exactly one. `code/evaluation/usage_report.md` reports both views.
+- **Final run:** 721 calls (Haiku 550 intent, of which 398 have distinct texts; Sonnet 160 agent calls for 77 cases; Flash 11 transcriptions), 1,122,288 tokens, $0.9465, i.e. 2,167 tokens and $0.001827 per request. With identical intent requests counted once: $0.9301, $0.001796 per request.
+- **Billed development:** $1.9184 priced, of which $1.8719 was actually charged (Anthropic); Flash ($0.0465) ran on a free-tier key, so it was priced but not charged. The total was $1.8604 when output.csv was produced.
+- **Rejected:** reporting only the cache-hit-free bill (it would understate what the final output depends on); summing the in-process ledger of the original run (it is not persisted, and the run was split across a re-run).

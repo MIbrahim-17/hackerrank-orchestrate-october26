@@ -550,3 +550,84 @@ repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-
 worktree=main
 parent_agent=none
 
+## [2026-10-25T09:58:29+05:00] Custom evaluation cases and evaluation_report.md
+
+User Prompt (verbatim, secrets redacted):
+Now the evaluation report. Do not change any pipeline code in this step.
+1. Create at least 5 custom evaluation cases in code/evaluation/custom_cases/, each with its input rows and the expected output, built from synthetic records so they do not reuse dataset personal data. Cover:
+   - a 3-hop email change where the request uses the oldest email
+   - a sync that recreates a deleted record before audit_at
+   - evidence captured after audit_at that must not change state or be cited
+   - a record found only through an old email_hash
+   - a non-deletion request in a non-English language
+   Make score.py run them and report the results.
+2. Write code/evaluation/evaluation_report.md with real numbers from score.py. Write everything in the markdown itself, because the judge ignores CSV and JSON files:
+   - case-level status accuracy, step-level precision, recall and F1, per-field accuracy, sequence accuracy on the 32 samples, with the --no-llm baseline next to the full system
+   - why sequence accuracy is 65.62%: all 11 misses come from missing resources, proven by removing those gold steps
+   - the 12 unrecovered sample resources by reason (9 ambiguous, 3 ungrounded) and the 108 of 111 ceiling
+   - each custom case written out (input, expected, actual, pass or fail)
+   - "Failures found and improvements made" from DECISIONS.md, each with root cause, fix and before and after numbers. Include the case_17 backup flag, the text sort, the random tie-break, the operations_stream parsing bug found through the agent on case_515, and the activity linking progression from 7 to 14 recovered.
+   - the agent's measured contribution, stated honestly: 0 changes on the samples, 46 of 46 ambiguous sets answered "none", 0 of 77 changes in the final run, and the case_515 discovery
+   - known limitations
+
+Agent Response Summary:
+Created 6 synthetic custom cases (the 5 requested plus a French legal-hold case) with input CSVs, evidence and expected outputs, and added score.py --custom, which runs the unchanged pipeline on a temporary merged dataset: 6/6 pass at 100% on every metric. Ran the full system on the samples (4 cases routed, 0 changes, byte-identical to the --no-llm baseline). Wrote code/evaluation/evaluation_report.md (465 lines) with measured metrics, the sequence-miss proof, the 12 unrecovered resources and the 108/111 ceiling, the generated custom-case details, failures and fixes with before/after numbers, the agent's contribution and limitations. No pipeline code changed (freeze tests pass); spend $1.9184.
+
+Actions:
+* Created code/evaluation/custom_cases/ (6 cases); edited code/evaluation/score.py (--custom)
+* Ran score.py --custom, main.py --sample (full and --no-llm), score.py, all tests
+* Created code/evaluation/evaluation_report.md; appended docs/DECISIONS.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T10:02:13+05:00] Usage report from the replayed final-run ledger
+
+User Prompt (verbatim, secrets redacted):
+Write code/evaluation/usage_report.md.
+The required content is the final full-dataset run that produced output.csv. Many of its calls were served from the disk cache, so report two views from the ledger:
+1. Final run, original token counts for every call the final output depends on: per model (provider and model name), number of calls, input tokens, output tokens, cache read and cache write tokens, total and average tokens per request over 518, estimated cost total and per request, then overall totals.
+2. Actual billed spend across all development, per model, with the $1.86 total.
+State the price table and its date for each model, that gemini-3.8-flash ran on a free-tier key so its cost is priced but was not charged, and the promotional Flash rate that ends 2026-12-31. Explain the token-efficiency measures in a short section: deterministic pre-fetch into the first message, routing only 77 cases to the agent, prompt caching on the agent loop but not on single-shot intent calls, and the disk cache making reruns free.
+
+Agent Response Summary:
+Added code/evaluation/usage_ledger.py, which replays the final run from cache (identical to output.csv) and sums the ledger, plus every billed cache entry. Wrote code/evaluation/usage_report.md: price tables with dates (Flash free tier, promo to 2026-12-31); final run 721 calls, 1,122,288 tokens, $0.9465 ($0.001827 per request), plus the distinct-call view ($0.9301; 398 of the 550 intent texts are distinct); billed development $1.9184 priced, $1.8719 charged ($1.8604 at output time; +$0.058 for the report's sample run and custom cases); and the token-efficiency measures.
+
+Actions:
+* Created code/evaluation/usage_ledger.py, code/evaluation/usage_report.md
+* Ran usage_ledger.py (offline replay; $0)
+* Appended docs/DECISIONS.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+
+## [2026-10-25T10:26:16+05:00] CHECKPOINT: phase 6a state, memory
+
+User Prompt (verbatim, secrets redacted):
+CHECKPOINT. Update docs/PROJECT_STATE.md for the phase we just finished: what is done, the latest sample score if it changed, open questions, and the exact next step. Append new decisions to docs/DECISIONS.md. Save only durable lessons to auto memory. Show me the diff of PROJECT_STATE.md.
+
+Agent Response Summary:
+Rewrote docs/PROJECT_STATE.md (53 lines) for phase 6a (custom cases, evaluation_report.md, usage_report.md): the sample score is unchanged, custom cases 6/6 pass, spend is $1.9184 priced and $1.8719 charged, and the next step is the README, then validator tests, code.zip and final checks. Added an open question on shipping the cached image transcriptions (a clean run without a Gemini key skips images). No new decisions to append (both recorded during the phase). Saved one durable lesson: build reports from runs and ledgers, not hand-typed numbers.
+
+Actions:
+* Rewrote docs/PROJECT_STATE.md
+* Wrote memory reports-from-runs.md; updated MEMORY.md
+
+Context:
+tool=Claude Code
+model=claude-opus-5-5
+branch=main
+repo_root=/home/popchacha/Desktop/HackerRank-Orchestrate/hackerrank-orchestrate-october26
+worktree=main
+parent_agent=none
+

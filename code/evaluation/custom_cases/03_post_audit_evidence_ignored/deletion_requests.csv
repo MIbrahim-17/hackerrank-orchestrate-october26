@@ -1,0 +1,2 @@
+case_id,email,requested_at,reported_status,reported_at,audit_at,request_text
+case_9003,casey.m@example.test,2026-07-01T08:00:00Z,COMPLETE,2026-07-03T08:00:00Z,2026-07-10T12:00:00Z,Please close my account permanently and confirm the deletion.

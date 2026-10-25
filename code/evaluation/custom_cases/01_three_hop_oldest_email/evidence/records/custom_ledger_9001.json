@@ -1,0 +1,31 @@
+{
+  "exported_at": "2026-05-15T10:00:00Z",
+  "origin": "custom_assurance_ledger",
+  "record_count": 3,
+  "records": [
+    {
+      "recorded_at": "2026-05-15T10:00:00Z",
+      "system": "account_service",
+      "resource_id": "account_90011",
+      "record_type": "USER_PROFILE",
+      "result": "NOT_FOUND",
+      "subject_reference": "avery.q3@example.test"
+    },
+    {
+      "recorded_at": "2026-05-15T10:00:00Z",
+      "system": "search_service",
+      "resource_id": "search_90012",
+      "record_type": "SEARCH_INDEX_ENTRY",
+      "result": "FOUND",
+      "subject_reference": "avery.q1@example.test"
+    },
+    {
+      "recorded_at": "2026-05-15T10:00:00Z",
+      "system": "security_service",
+      "resource_id": "audit_record_90013",
+      "record_type": "SECURITY_AUDIT_LOG",
+      "result": "FOUND",
+      "subject_reference": "user_9001"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "exported_at": "2026-08-10T10:00:00Z",
+  "origin": "custom_assurance_ledger",
+  "record_count": 1,
+  "records": [
+    {
+      "recorded_at": "2026-08-10T10:00:00Z",
+      "system": "account_service",
+      "resource_id": "account_90042",
+      "record_type": "USER_PROFILE",
+      "result": "NOT_FOUND",
+      "subject_reference": "dana.p2@example.test"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "exported_at": "2026-09-10T09:00:00Z",
+  "origin": "custom_assurance_ledger",
+  "record_count": 3,
+  "records": [
+    {
+      "recorded_at": "2026-09-10T09:00:00Z",
+      "system": "account_service",
+      "resource_id": "account_90061",
+      "record_type": "USER_PROFILE",
+      "result": "NOT_FOUND",
+      "subject_reference": "felix.g@example.test"
+    },
+    {
+      "recorded_at": "2026-09-10T09:00:00Z",
+      "system": "legal_service",
+      "resource_id": "legal_hold_90062",
+      "record_type": "LEGAL_HOLD_RECORD",
+      "result": "FOUND",
+      "subject_reference": "user_9006"
+    },
+    {
+      "recorded_at": "2026-09-10T09:00:00Z",
+      "system": "security_service",
+      "resource_id": "audit_record_90063",
+      "record_type": "SECURITY_AUDIT_LOG",
+      "result": "FOUND",
+      "subject_reference": "user_9006"
+    }
+  ]
+}

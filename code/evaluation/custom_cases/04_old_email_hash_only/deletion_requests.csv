@@ -1,0 +1,2 @@
+case_id,email,requested_at,reported_status,reported_at,audit_at,request_text
+case_9004,dana.p2@example.test,2026-08-01T10:00:00Z,COMPLETE,2026-08-02T10:00:00Z,2026-08-15T10:00:00Z,I want my account and all of my personal data deleted.

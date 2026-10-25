@@ -1,0 +1,7 @@
+audit_id,user_id,event_time,field_name,old_value,new_value
+audit_9001,user_9001,2025-01-10T10:00:00Z,email,avery.q0@example.test,avery.q1@example.test
+audit_9003,user_9001,2025-06-10T10:00:00Z,email,avery.q1@example.test,avery.q2@example.test
+audit_9005,user_9001,2025-11-10T10:00:00Z,email,avery.q2@example.test,avery.q3@example.test
+audit_9002,user_9001,2025-01-10T10:00:00Z,email_hash,a7109bd5c61b61de12dc2333ca0329c3f70d7c8e42b40f0a28045021ffe37f16,298dbc302f5130c0e1bc0c1ac7121abf02baf50398cebb0e5659b5c14bdd1a21
+audit_9004,user_9001,2025-06-10T10:00:00Z,email_hash,298dbc302f5130c0e1bc0c1ac7121abf02baf50398cebb0e5659b5c14bdd1a21,1e67ecab11040147824723f43c197f7e25ccf52d56d6ea34eaf378334fed3c9b
+audit_9006,user_9001,2025-11-10T10:00:00Z,email_hash,1e67ecab11040147824723f43c197f7e25ccf52d56d6ea34eaf378334fed3c9b,28add223f16c8514b61d1fa8a26170decebcd427f303bdd9360ff9cf46a73b63

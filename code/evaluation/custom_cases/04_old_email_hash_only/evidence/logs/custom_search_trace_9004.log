@@ -1,0 +1,2 @@
+2026-08-10T09:00:00Z level=DEBUG service=search_service trace_id=tr-9004001 event=index_query_started match_key=de5a9ed7c602017b61eae58809aa54cac88fc6c0b6e6b3aa0ea8173bfb92dba4 attempt=1
+2026-08-10T09:00:01Z level=INFO service=search_service trace_id=tr-9004001 resource_id=search_90041 event=index_query_completed result=hit index=customer_directory_v3

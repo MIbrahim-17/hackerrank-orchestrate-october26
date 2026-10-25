@@ -1,0 +1,2 @@
+activity_id,event_time,event_type,source_system,target_system,resource_id,reported_result,details
+activity_9001,2026-06-07T09:00:00Z,SYNC_RECORD,integration_service,account_service,account_90021,SUCCESS,Active connector repopulated downstream resource account_90021.
